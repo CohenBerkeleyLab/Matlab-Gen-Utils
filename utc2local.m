@@ -12,9 +12,13 @@ function [ local ] = utc2local( utcsec, timezone)
 zones = {'est','edt','cst','cdt','mst','mdt','pst','pdt'};
 offset = [-5, -4, -6, -5, -7, -6, -8, -7];
 
-t = strcmpi(timezone,zones);
-
-h = floor(utcsec/3600) + offset(t);
+if ischar(timezone)
+    t = strcmpi(timezone,zones);
+    hours_added = offset(t);
+else
+    hours_added = timezone;
+end
+h = floor(utcsec/3600) + hours_added;
 m = floor(mod(utcsec,3600)/60);
 
 local = sprintf('%2d:%02d',h,m);
