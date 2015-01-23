@@ -9,11 +9,17 @@ function [ x,y ] = fill_nans( x,y,varargin )
 %   interpolates interior nans and leaves leading or trailing ones present,
 %   pass 'noclip' as the optional third parameter
 
+E = JLLErrors;
+
 narginchk(2,3);
 if nargin > 2 && strcmpi(varargin{1},'noclip')
     clipping_bool = false;
 else
     clipping_bool = true;
+end
+
+if all(isnan(y))
+    error(E.badinput('''y'' must not be all nans.'));
 end
 
 % Trim leading or trailing NaNs
