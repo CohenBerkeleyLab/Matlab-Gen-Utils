@@ -12,6 +12,8 @@ function [ local ] = utc2local( utcsec, timezone)
 zones = {'est','edt','cst','cdt','mst','mdt','pst','pdt'};
 offset = [-5, -4, -6, -5, -7, -6, -8, -7];
 
+% If the user passes a string, it's assumed to be one of the US timezone
+% abbreviations, otherwise it is assumed to be the numerical offset.
 if ischar(timezone)
     t = strcmpi(timezone,zones);
     hours_added = offset(t);
