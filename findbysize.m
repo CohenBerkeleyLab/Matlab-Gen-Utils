@@ -11,7 +11,7 @@ if numel(varargin)>0 && ischar(varargin{1});
 elseif isempty(varargin);
     order = 'smallest';
 else
-    error('findbysize:invalid_order','Third argument must be a string');
+    error(E.badinput('Third argument must be a string'));
 end
 
 Xvector = X(:); 
