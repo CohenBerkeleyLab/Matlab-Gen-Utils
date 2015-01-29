@@ -85,7 +85,7 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.profile_numbers = 'ProfileNumber';
     
     dates = {'2013-01-16','2013-02-06'};
-    directory = fullfile(main_dir, 'DISCOVER-AQ_MD/P3/1sec/');
+    directory = fullfile(main_dir, 'DISCOVER-AQ_CA/P3/1sec/');
     
 % DISCOVER-TX
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'tx'))
