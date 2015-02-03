@@ -1,4 +1,4 @@
-function [ Names, dates, directory ] = merge_field_names( campaign_name )
+function [ Names, dates, directory, range_files ] = merge_field_names( campaign_name )
 %merge_field_names Returns field names of key fields in merge files
 %   Different field campaigns name the same data differently.  This
 %   function will return a structure with all the appropriate field names
@@ -50,6 +50,7 @@ end
 
 dates = cell(1,2);
 directory = '';
+range_files = {''};
 
 % All campaign data should be stored in a central directory, this is that
 % directory
@@ -115,6 +116,8 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     
     dates = {'2013-08-06','2013-09-23'};
     directory = fullfile(main_dir, 'SEAC4RS/DC8/1sec/');
+    
+    range_files = {fullfile(main_dir, 'SEAC4RS/SEAC4RS_Profile_Ranges.mat')};
 
 % DC3 (not to be confused with the DC8 aircraft)
 elseif ~isempty(regexpi(campaign_name,'dc3'))
@@ -139,12 +142,13 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
     Names.no2_lif = 'NO2_UCB';
     Names.no2_ncar = 'NO2_NCAR';
     Names.aerosol_extinction = 0;
-    Names.aerosol_scattering = 'Total_Scatter550_nm'; % figure these two out
+    Names.aerosol_scattering = 'Total_Scatter550_nm';
     
     
     if ~isempty(regexpi(campaign_name,'carb'))
         dates = {'2008-06-18','2008-06-24'};
         directory = fullfile(main_dir,'ARCTAS-CARB/DC8/1sec/');
+        range_files = {fullfile(main_dir, 'ARCTAS-CARB/ARCTAS-CA Altitude Ranges Exclusive 3.mat')};
     elseif ~isempty(regexpi(campaign_name,'b'))
         dates = {'2008-06-29','2008-07-13'};
         directory = fullfile(main_dir,'ARCTAS-B/DC8/1sec/');
