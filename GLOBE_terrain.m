@@ -10,7 +10,7 @@ else
     ptskip = varargin{1};
 end
 
-globe_dir = '/Volumes/share/GROUP/SAT/BEHR/GLOBE_files/';
+globe_dir = '/Volumes/share-sat/SAT/BEHR/GLOBE_Database/';
 [GLOBE_ALT_METERS, refvec] = globedem(globe_dir,ptskip,latbdy,lonbdy);
 
 cell_count = refvec(1);

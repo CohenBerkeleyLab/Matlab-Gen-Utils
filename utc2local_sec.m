@@ -17,9 +17,9 @@ zones = {'est','edt','cst','cdt','mst','mdt','pst','pdt'};
 offset = [-5, -4, -6, -5, -7, -6, -8, -7];
 
 % Check the inputs
-if iscell(timezone) || (ismatrix(timezone) && isnumeric(timezone))
+if iscell(timezone) || (~isscalar(timezone) && ismatrix(timezone) && isnumeric(timezone))
     if numel(timezone) ~= numel(utcsec)
-        error(E.badinput('Input vector/cell array timezone must have the same number of elements as the vector utcsec'));
+        error(E.badinput('Input vector/cell array timezone must have the same number of elements as the vector utcsec or be a scalar'));
     end
 end
 
