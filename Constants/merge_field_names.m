@@ -110,7 +110,7 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     Names.radar_alt = 'RadarAlt';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
-    Names.no2_ncar = 'NO2_CL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
+    Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
     
@@ -126,7 +126,7 @@ elseif ~isempty(regexpi(campaign_name,'dc3'))
     Names.radar_alt = 'RadarAlt';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
-    Names.no2_ncar = 'NO2_CL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
+    Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
     Names.aerosol_extinction = 'EXTamb532nm_TSI_PSAP';
     Names.aerosol_scattering = 'SCATamb532nm_TSI';
     
