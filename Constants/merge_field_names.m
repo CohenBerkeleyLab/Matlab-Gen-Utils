@@ -1,4 +1,4 @@
-function [ Names, dates, directory, range_files ] = merge_field_names( campaign_name )
+function [ Names, dates, directory, range_file ] = merge_field_names( campaign_name )
 %merge_field_names Returns field names of key fields in merge files
 %   Different field campaigns name the same data differently.  This
 %   function will return a structure with all the appropriate field names
@@ -32,6 +32,12 @@ function [ Names, dates, directory, range_files ] = merge_field_names( campaign_
 %           profile. Only a field in DISCOVER campaigns.
 %   Any field that doesn't exist for a given campaign returns an empty
 %   string.
+%
+%   This also returns (as additional outputs) the dates for the campaign,
+%   the directory where the merge files can be found, and (if available)
+%   the UTC ranges file used to define profiles for campaigns without
+%   predefined profile numbers.  In the case where multiple range files are
+%   available, this function will ask the user which one to use.
 
 E = JLLErrors;
 
@@ -40,7 +46,7 @@ E = JLLErrors;
 % a mistake adding a new campaign we can avoid instances of other functions
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
-return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'theta', 'no2_lif', 'no2_ncar',...
+return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'no2_lif', 'no2_ncar',...
     'aerosol_extinction', 'aerosol_scattering', 'profile_numbers'}';
 
 % Initialize the return variables
@@ -63,6 +69,8 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_ALT';
     Names.radar_alt = 'A_RadarAlt';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_LIF';
     Names.no2_ncar = 'NO2_NCAR';
@@ -78,6 +86,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_ALT';
     Names.radar_alt = 'Radar_Altitude';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
@@ -93,6 +103,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_ALT';
     Names.radar_alt = 'Radar_Altitude';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
@@ -108,6 +120,8 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_ALT';
     Names.radar_alt = 'RadarAlt';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
@@ -124,6 +138,8 @@ elseif ~isempty(regexpi(campaign_name,'dc3'))
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_ALT';
     Names.radar_alt = 'RadarAlt';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
@@ -138,6 +154,8 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
     Names.pressure_alt = 'ALTP';
     Names.gps_alt = 'GPS_Altitude';
     Names.radar_alt = 'Radar_Altitude';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_UCB';
     Names.no2_ncar = 'NO2_NCAR';
@@ -153,8 +171,61 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
         dates = {'2008-06-29','2008-07-13'};
         directory = fullfile(main_dir,'ARCTAS-B/DC8/1sec/');
     end
+    
+% INTEX-B
+elseif ~isempty(regexpi(campaign_name,'intex')) && ~isempty(regexpi(campaign_name,'b'))
+    Names.pressure_alt = 'ALTITUDE_PRESSURE';
+    Names.gps_alt = 'ALTITUDE_GPS';
+    Names.radar_alt = 'ALTITUDE_RADAR';
+    Names.temperature = 'TEMP_STAT_C';
+    Names.pressure = 'STAT_PRESSURE';
+    Names.theta = 'THETA';
+    Names.no2_lif = 'NO2';
+    Names.no2_ncar = ''; 
+    Names.aerosol_extinction = 0;
+    Names.aerosol_scattering = 0;
+    
+    dates = {'2006-03-04','2006-05-15'};
+    directory = fullfile(main_dir, 'INTEX-B/DC8/1sec/');
+    
+    range_files = {fullfile(main_dir, 'INTEX-B/INTEXB_Profile_UTC_Ranges.mat'),...
+                   fullfile(main_dir, 'INTEX-B/INTEXB_Profile_UTC_Ranges_Inclusive.mat')};
 else
     error(E.badinput('Could not parse the given campaign name - see help for this function for suggestions of proper campaign names.'));
+end
+
+
+% If there is only one range file, return it. If there are multiple
+% options, ask the user which one to use (and don't continue until the
+% input is valid).  If there is not a range file specified, return an empty
+% string.  Only do this if the range file is actually output to a variable,
+% otherwise, don't waste the user's time.
+
+if nargout >= 4
+    n = numel(range_files);
+    if n == 1
+        range_file = range_files{1};
+    elseif n > 1
+        while true
+            opts_nums = 1:n;
+            opts_str = cell(1,n);
+            for a=1:n
+                [~,file] = fileparts(range_files{a});
+                opts_str{a} = sprintf('%d: %s',opts_nums(a),file);
+            end
+            opts_spec = repmat('\t%s\n',1,n);
+            opts_msg = sprintf('Enter the number for which range file to use:\n%s> ',opts_spec);
+            rf_choice = input(sprintf(opts_msg,opts_str{:}));
+            if rf_choice >= 1 && rf_choice <= n
+                range_file = range_files{rf_choice};
+                break;
+            else
+                fprintf('\n\n%d is not a valid option.\n',rf_choice);
+            end
+        end
+    else
+        range_file = '';
+    end
 end
 
 

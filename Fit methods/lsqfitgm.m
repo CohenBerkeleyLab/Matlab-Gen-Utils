@@ -41,7 +41,7 @@
 %               that is in your MATLABPATH in order for this algorithm to
 %               execute properly.
 
-function [m,b,r,sm,sb]=lsqfitgm(X,Y)
+function [m,b,r,sm,sb,sem]=lsqfitgm(X,Y)
 
 % Determine slope of Y-on-X regression
 
@@ -98,3 +98,9 @@ diff = Y - b - m .* X;
 s2 = sum(diff .* diff) / (n-2);
 sm = sqrt(n * s2 / den);
 sb = sqrt(Sx2 * s2 / den);
+
+% JLL 15 Feb 2015: sm here seems to return the same result as the
+% se(beta_1) from
+% http://reliawiki.org/index.php/Simple_Linear_Regression_Analysis -
+% although my algebra is sufficiently fuzzy right now that I can't prove
+% they are the same.

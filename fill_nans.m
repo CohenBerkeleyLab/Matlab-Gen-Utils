@@ -121,18 +121,23 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Trim leading or trailing NaNs
-first_val = find(~isnan(y),1,'first');
-last_val = find(~isnan(y),1,'last');
+
 if clipping_bool
     if isnan(y(1))
+        first_val = find(~isnan(y),1,'first');
         y = y(first_val:end);
         x = x(first_val:end);
-        error_vec = error_vec(first_val:end);
+        if error_bool
+            error_vec = error_vec(first_val:end);
+        end
     end
     if isnan(y(end))
+        last_val = find(~isnan(y),1,'last');
         y = y(1:last_val);
         x = x(1:last_val);
-        error_vec = error_vec(last_val:end);
+        if error_bool
+            error_vec = error_vec(last_val:end);
+        end
     end
 end
 
