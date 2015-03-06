@@ -47,7 +47,7 @@ E = JLLErrors;
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
 return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'no2_lif', 'no2_ncar',...
-    'aerosol_extinction', 'aerosol_scattering', 'profile_numbers'}';
+    'aerosol_extinction', 'aerosol_scattering','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers'}';
 
 % Initialize the return variables
 for a=1:numel(return_fields)
@@ -76,6 +76,8 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
     Names.no2_ncar = 'NO2_NCAR';
     Names.aerosol_extinction = 'EXTamb532';
     Names.aerosol_scattering = 'SCamb532';
+    Names.aerosol_ssa = 'SingleScatteringAlbedo_at_550nmambient';
+    Names.aerosol_dry_ssa = 'SingleScatteringAlbedo_at_550nm';
     Names.profile_numbers = 'ProfileSequenceNum';
     
     dates = {'2011-07-01','2011-07-31'};
@@ -93,6 +95,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXTamb532_TSI_PSAP';
     Names.aerosol_scattering = 'SCATamb532_TSI';
+    Names.aerosol_ssa = 'SingleScatAlbedo550amb_TSIneph_PSAP';
+    Names.aerosol_dry_ssa = 'SingleScatAlbedo550dry_TSIneph_PSAP';
     Names.profile_numbers = 'ProfileNumber';
     
     dates = {'2013-01-16','2013-02-06'};
@@ -110,6 +114,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nm-amb_total_LARGE,';
+    Names.aerosol_ssa = 'SSA550nmamb_LARGE';
+    Names.aerosol_dry_ssa = 'SSA550nmdry_LARGE';
     Names.profile_numbers = 'ProfileNumber';
     
     dates = {'2013-09-01','2013-09-30'};
@@ -127,6 +133,8 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.aerosol_ssa = 'SSA550nmamb_TSIandPSAP_LARGE';
+    Names.aerosol_dry_ssa = 'SSA550nmdry_TSIandPSAP_LARGE';
     
     dates = {'2013-08-06','2013-09-23'};
     directory = fullfile(main_dir, 'SEAC4RS/DC8/1sec/');
@@ -145,6 +153,8 @@ elseif ~isempty(regexpi(campaign_name,'dc3'))
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
     Names.aerosol_extinction = 'EXTamb532nm_TSI_PSAP';
     Names.aerosol_scattering = 'SCATamb532nm_TSI';
+    Names.aerosol_ssa = 'SingleScatAlbedo_amb550nm_TSIneph_PSAP';
+    Names.aerosol_dry_ssa = 'SingleScatAlbedo_dry700nm_TSIneph_PSAP';
     
     dates = {'2012-05-18','2012-06-22'};
     directory = fullfile(main_dir, 'DC3/DC8/1sec/');
@@ -161,6 +171,12 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
     Names.no2_ncar = 'NO2_NCAR';
     Names.aerosol_extinction = 0;
     Names.aerosol_scattering = 'Total_Scatter550_nm';
+    % For Arctas, it is not specified whether these are taken at ambient or
+    % dry conditions.  Since other later campaigns only have dry data at
+    % multiple wavelengths, I'm inclined to guess that this is actually dry
+    % data.
+    Names.aerosol_ssa = 'Single_Scatter_Albedo_Green';
+    Names.aerosol_dry_ssa = 'Single_Scatter_Albedo_Green';
     
     
     if ~isempty(regexpi(campaign_name,'carb'))
@@ -184,6 +200,8 @@ elseif ~isempty(regexpi(campaign_name,'intex')) && ~isempty(regexpi(campaign_nam
     Names.no2_ncar = ''; 
     Names.aerosol_extinction = 0;
     Names.aerosol_scattering = 0;
+    Names.aerosol_ssa = 0;
+    Names.aerosol_dry_ssa = 0;
     
     dates = {'2006-03-04','2006-05-15'};
     directory = fullfile(main_dir, 'INTEX-B/DC8/1sec/');
