@@ -5,7 +5,17 @@ function [ fileDamf, fileTmp ] = amf_filepaths( )
 %   Update as needed if file paths change.  This function should always be
 %   referenced for these paths to make code as portable as possible.
 
-amf_tools_path = '/Users/Josh/Documents/MATLAB/BEHR/AMF_tools';
+global onCluster
+if isempty(onCluster)
+    onCluster = 0;
+end
+
+if onCluster
+    amf_tools_path = '/global/home/users/laughner/MATLAB/BEHR/AMF_tools';
+else
+    amf_tools_path = '/Users/Josh/Documents/MATLAB/BEHR/AMF_tools';
+end
+
 fileTmp = fullfile(amf_tools_path,'nmcTmpYr.txt');
 fileDamf = fullfile(amf_tools_path,'damf.txt');
 
