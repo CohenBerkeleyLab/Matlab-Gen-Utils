@@ -1,4 +1,4 @@
-function [ Names, dates, directory, range_file ] = merge_field_names( campaign_name )
+function [ Names, dates, directory, range_file, ground_site_dir ] = merge_field_names( campaign_name )
 %merge_field_names Returns field names of key fields in merge files
 %   Different field campaigns name the same data differently.  This
 %   function will return a structure with all the appropriate field names
@@ -47,7 +47,7 @@ E = JLLErrors;
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
 return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'no2_lif', 'no2_ncar',...
-    'aerosol_extinction', 'aerosol_scattering','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers'}';
+    'aerosol_extinction', 'aerosol_scattering','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
 
 % Initialize the return variables
 for a=1:numel(return_fields)
@@ -56,6 +56,7 @@ end
 
 dates = cell(1,2);
 directory = '';
+ground_site_dir = '';
 range_files = {''};
 
 % All campaign data should be stored in a central directory, this is that
@@ -79,9 +80,14 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
     Names.aerosol_ssa = 'SingleScatteringAlbedo_at_550nmambient';
     Names.aerosol_dry_ssa = 'SingleScatteringAlbedo_at_550nm';
     Names.profile_numbers = 'ProfileSequenceNum';
+    Names.ground_no2 = {'','f_42c_NO2','NO2_conc_ppb','','NO2','NO2'};
+    Names.ground_utc = {'','UTC','UTC','','UTC','UTC';...
+                        '','UTC_mid','Mid_UTC','','Mid_UTC','UTC_mid';...
+                        '','UTC_stop','Stop_UTC','','Stop_UTC','UTC_stop'};
     
     dates = {'2011-07-01','2011-07-31'};
     directory = fullfile(main_dir,'DISCOVER-AQ_MD/P3/1sec/');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_MD/Ground/VariousTimePeriods/');
 
 % DISCOVER-CA
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'ca'))
@@ -98,9 +104,14 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.aerosol_ssa = 'SingleScatAlbedo550amb_TSIneph_PSAP';
     Names.aerosol_dry_ssa = 'SingleScatAlbedo550dry_TSIneph_PSAP';
     Names.profile_numbers = 'ProfileNumber';
+    Names.ground_no2 = {'photo_NO2_ppbv','NO2_ppbv','NO2','','','NO2'};
+    Names.ground_utc = {'start_secUTC','start_secUTC','UTC_start','','','UTC_start';...
+                        'mid_secUTC','mid_secUTC','UTC_mid','','','UTC_mid';...
+                        'stop_secUTC','stop_secUTC','UTC_stop','','','UTC_stop'};
     
     dates = {'2013-01-16','2013-02-06'};
     directory = fullfile(main_dir, 'DISCOVER-AQ_CA/P3/1sec/');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CA/Ground/VariousTimePeriods/');
     
 % DISCOVER-TX
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'tx'))
