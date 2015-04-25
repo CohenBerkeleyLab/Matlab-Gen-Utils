@@ -27,6 +27,8 @@ function [ Names, dates, directory, range_file ] = merge_field_names( campaign_n
 %           wavelengths
 %       aerosol_scattering - Aerosol scattering only measurements (no
 %           absorption)
+%       abs_angstr_exp - Angstrom exponent for absorption
+%       scat_angst_exp - Angstrom exponent for scattering
 %       aerosol_ssa - Aerosol single scattering albedo measurements
 %       profile_numbers - The field with the number assigned to each
 %           profile. Only a field in DISCOVER campaigns.
@@ -47,7 +49,7 @@ E = JLLErrors;
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
 return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'no2_lif', 'no2_ncar',...
-    'aerosol_extinction', 'aerosol_scattering','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers'}';
+    'aerosol_extinction', 'aerosol_scattering','abs_angstr_exp','scat_angst_exp','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers'}';
 
 % Initialize the return variables
 for a=1:numel(return_fields)
@@ -76,6 +78,8 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
     Names.no2_ncar = 'NO2_NCAR';
     Names.aerosol_extinction = 'EXTamb532';
     Names.aerosol_scattering = 'SCamb532';
+    Names.abs_angstr_exp = 'Angstrom_Exponent_of_Absorption_at_450and550nm';
+    Names.scat_angstr_exp = 'Angstrom_Exponent_of_Scattering_at_450and550nm';
     Names.aerosol_ssa = 'SingleScatteringAlbedo_at_550nmambient';
     Names.aerosol_dry_ssa = 'SingleScatteringAlbedo_at_550nm';
     Names.profile_numbers = 'ProfileSequenceNum';
@@ -95,6 +99,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXTamb532_TSI_PSAP';
     Names.aerosol_scattering = 'SCATamb532_TSI';
+    Names.abs_angstr_exp = 'AngstromExponenetABS_470to532';
+    Names.scat_angstr_exp = 'AngstromExponenetSCAT_450to550';
     Names.aerosol_ssa = 'SingleScatAlbedo550amb_TSIneph_PSAP';
     Names.aerosol_dry_ssa = 'SingleScatAlbedo550dry_TSIneph_PSAP';
     Names.profile_numbers = 'ProfileNumber';
@@ -114,6 +120,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nm-amb_total_LARGE,';
+    Names.abs_angstr_exp = 'AE_ABS_450to700nm_LARGE';
+    Names.scat_angstr_exp = 'AE_SCAT_450to700nm_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
     Names.aerosol_dry_ssa = 'SSA550nmdry_LARGE';
     Names.profile_numbers = 'ProfileNumber';
