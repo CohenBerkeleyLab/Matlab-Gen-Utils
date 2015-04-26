@@ -46,7 +46,7 @@ E = JLLErrors;
 % a mistake adding a new campaign we can avoid instances of other functions
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
-return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'no2_lif', 'no2_ncar',...
+return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'h2o', 'no2_lif', 'no2_ncar','acn','hcn','co'...
     'aerosol_extinction', 'aerosol_scattering','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
 
 % Initialize the return variables
@@ -121,16 +121,47 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.temperature = 'TEMPERATURE';
     Names.pressure = 'PRESSURE';
     Names.theta = 'THETA';
+    Names.h2o = 'H2O_MixingRatio';
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
-    Names.aerosol_scattering = 'SCAT550nm-amb_total_LARGE,';
+    Names.aerosol_scattering = 'SCAT550nm-amb_total_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
     Names.aerosol_dry_ssa = 'SSA550nmdry_LARGE';
     Names.profile_numbers = 'ProfileNumber';
+    Names.ground_no2 = {'NO2ppbv', 'NO2_ppbv', 'CAPS_NO2_ppbv', 'NO2_099', 'photo_NO2_ppbv', 'NO2_099', '', 'NO2_099'};
+    Names.ground_utc = {'UTC_start', 'StartTime_UTsec', 'start_sec-UTC', 'StartTime', 'start_sec-UTC', 'StartTime', '', 'StartTime';...
+                        'UTC_mid', 'MidTime_UTsec', 'mid_sec-UTC', '', 'mid_sec-UTC', '', '', '';...
+                        'UTC_stop', 'StopTime_UTsec', 'stop_sec-UTC', 'StopTime', 'stop_sec-UTC', 'StopTime', '', 'StopTime'};
     
     dates = {'2013-09-01','2013-09-30'};
     directory = fullfile(main_dir, 'DISCOVER-AQ_TX/P3/1sec/');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_TX/Ground/VariousTimePeriods');
+    
+% DISCOVER-CO
+elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'co'))
+    Names.pressure_alt = 'ALTP';
+    Names.gps_alt = 'GPS_ALT';
+    Names.radar_alt = 'Radar_Altitude';
+    Names.temperature = 'TEMPERATURE';
+    Names.pressure = 'PRESSURE';
+    Names.theta = 'THETA';
+    Names.no2_lif = 'NO2_LIF';
+    Names.no2_ncar = 'NO2_MixingRatio';
+    Names.acn = 'Acetonitrile_MixingRatio';
+    Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
+    Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.aerosol_ssa = 'SSA550nmamb_LARGE';
+    Names.aerosol_dry_ssa = 'SSA550nmdry_LARGE';
+    Names.profile_numbers = 'ProfileNumber';
+    Names.ground_no2 = {'Photo_NO2_ppbv', 'NO2_ppbv', 'T500_NO2_ppbv', '', 'NO2', 'Photo_NO2_ppbv'};
+    Names.ground_utc = {'start_sec-UTC', 'Start_UTC', 'start_sec-UTC', '', 'UTC_start', 'start_sec-UTC';...
+                        'mid_sec-UTC', 'Mid_UTC', 'mid_sec-UTC', '', 'UTC_mid', 'mid_sec-UTC';...
+                        'stop_sec-UTC', 'Stop_UTC', 'stop_sec-UTC', '', 'UTC_stop', 'stop_sec-UTC'};
+    
+    dates = {'2014-07-17','2014-08-10'};
+    directory = fullfile(main_dir, 'DISCOVER-AQ_CO/P3/1sec/');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CO/Ground/VariousTimePeriods');
     
 % SEAC4RS
 elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_name,'seacers'));
@@ -142,6 +173,9 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
+    Names.co = 'CO_DACOM';
+    Names.acn = 'Acetonitrile';
+    Names.hcn = 'HCN_CIT';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_TSIandPSAP_LARGE';

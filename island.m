@@ -25,9 +25,9 @@ function [ isLand ] = island( lon, lat, varargin )
 
 
 p = inputParser;
-p.addParamValue('density',10,@isscalar);
-p.addParamValue('lonlim',[-130,-60],@(x) numel(x)==2);
-p.addParamValue('latlim',[20,55], @(x) numel(x)==2);
+p.addParameter('density',10,@isscalar);
+p.addParameter('lonlim',[-130,-60],@(x) numel(x)==2);
+p.addParameter('latlim',[20,55], @(x) numel(x)==2);
 p.parse(varargin{:});
 pout=p.Results;
 density = pout.density;
@@ -51,7 +51,7 @@ end
 
 % Calculate
 coast = load('coast.mat');
-[Z, R] = vec2mtx(coast.lat, coast.long, 10, latlim, lonlim, 'filled');
+[Z, R] = vec2mtx(coast.lat, coast.long, density, latlim, lonlim, 'filled');
 val = ltln2val(Z, R, lat, lon);
 isLand = val == 0;
 
