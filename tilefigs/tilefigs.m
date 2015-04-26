@@ -90,7 +90,11 @@ monitorSize(2) = monitorSize(2) - border(2) - border(4);
 %% Select figures to use
 if ~exist('handles','var') || isempty(handles)
     % No figure handles specified, select all figures
-    handles = sort(get (0,'Children')); % locate all open figure handles
+    %handles = sort(get (0,'Children')); % locate all open figure handles
+    % JLL: EDIT: 1 Apr 2015 to deal with MATLAB 2014b and on figure handles
+    handles = get(0,'children');
+    [~,h_I] = sort([handles(:).Number]);
+    handles = handles(h_I);
     %handles = handles(end:-1:1); % Re-order so that first created is in upper left
 end
 nFigures = length(handles);

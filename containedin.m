@@ -8,6 +8,8 @@ function [ xx ] = containedin( A, B, case_sensitive )
 
 E = JLLErrors;
 
+warning('The functionality of "containedin" is handled by the buildin MATLAB function "ismember". Please replace');
+
 % Check input
 if (~isnumeric(A) && ~iscell(A)) || (~isnumeric(B) && ~iscell(B))
     error(E.badinput('A and B can be matrices, vectors, scalars, or cell arrays only'));
