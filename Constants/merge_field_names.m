@@ -48,6 +48,7 @@ E = JLLErrors;
 % a mistake adding a new campaign we can avoid instances of other functions
 % expecting a field to be no2_lif and getting one that is NO2_LIF.  ADD ANY
 % ADDITIONAL FIELDS TO RETURN HERE.
+
 return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'h2o', 'no2_lif', 'no2_ncar','acn','hcn','co'...
     'aerosol_extinction', 'aerosol_scattering','abs_angstr_exp','scat_angst_exp','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
 
@@ -131,7 +132,7 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
-    Names.aerosol_scattering = 'SCAT550nm-amb_total_LARGE';
+    Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
     Names.abs_angstr_exp = 'AE_ABS_450to700nm_LARGE';
     Names.scat_angstr_exp = 'AE_SCAT_450to700nm_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
