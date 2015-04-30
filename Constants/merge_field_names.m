@@ -50,7 +50,7 @@ E = JLLErrors;
 % ADDITIONAL FIELDS TO RETURN HERE.
 
 return_fields = {'pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'h2o', 'no2_lif', 'no2_ncar','acn','hcn','co'...
-    'aerosol_extinction', 'aerosol_scattering','abs_angstr_exp','scat_angst_exp','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
+    'aerosol_extinction', 'aerosol_scattering','abs_angstr_exp','scat_angstr_exp','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
 
 % Initialize the return variables
 for a=1:numel(return_fields)
@@ -160,6 +160,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.acn = 'Acetonitrile_MixingRatio';
     Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
     Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.abs_angstr_exp = 'AE_ABSdry_450to700nm_LARGE';
+    Names.scat_angstr_exp = 'AE_SCATamb_450to700nm_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
     Names.aerosol_dry_ssa = 'SSA550nmdry_LARGE';
     Names.profile_numbers = 'ProfileNumber';
