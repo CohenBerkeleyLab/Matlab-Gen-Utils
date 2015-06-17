@@ -32,6 +32,8 @@ function runs = contiguous(A,varargin)
 %   is probably not appropriate for floating point values.  You decide.  
 %
 
+error('general:deprecated','Remove this function and replace with findBlock')
+
 if prod(size(A)) ~= length(A),
     error('A must be a vector.')
 end
