@@ -1,4 +1,4 @@
-function [ Names, dates, directory, range_file, ground_site_dir ] = merge_field_names( campaign_name )
+function [ Names, dates, directory, range_file, ground_site_dir ] = merge_field_names( campaign_name, ask_ranges )
 %merge_field_names Returns field names of key fields in merge files
 %   Different field campaigns name the same data differently.  This
 %   function will return a structure with all the appropriate field names
@@ -15,6 +15,8 @@ function [ Names, dates, directory, range_file, ground_site_dir ] = merge_field_
 %   Discover-AQ MD will all successfully indicate to use the field names
 %   from the Maryland Discover-AQ campaign.  If no campaign name can be
 %   matched, an error is thrown.
+%
+%   The second argument is optional. See below for its use.
 %
 %   Fields returned are:
 %       pressure_alt - pressure derived altitude
@@ -39,9 +41,26 @@ function [ Names, dates, directory, range_file, ground_site_dir ] = merge_field_
 %   the directory where the merge files can be found, and (if available)
 %   the UTC ranges file used to define profiles for campaigns without
 %   predefined profile numbers.  In the case where multiple range files are
-%   available, this function will ask the user which one to use.
+%   available, this function will ask the user which one to use, as long as
+%   the range file is requested (i.e. nargout >= 4). If you have 5+ output
+%   arguments but don't want the range file (so its output is ~ in the
+%   function call) you can force this function not to ask about the range
+%   file (and just return it as an empty string) by setting the optional
+%   second argument to false.
 
 E = JLLErrors;
+
+% Check that the first input is a string. Default the second argument to
+% true, and ensure that it is a logical variable or can be used as one.
+if ~ischar(campaign_name)
+    E.badinput('campaign_name must be a string')
+end
+if nargin < 2
+    ask_ranges = true;
+elseif ~islogical(ask_ranges) && (~isnumeric(ask_ranges) || ~isscalar(ask_ranges))
+    E.badinput('ask_ranges (if given) must be a logical or scalar numeric value')
+end
+    
 
 % Setup the fields the output structure is expected to have - this will be
 % validated against before the structure is returned.  That way, if I make
@@ -50,7 +69,8 @@ E = JLLErrors;
 % ADDITIONAL FIELDS TO RETURN HERE.
 
 return_fields = {'longitude','latitude','pressure_alt', 'gps_alt', 'radar_alt', 'temperature', 'pressure','theta', 'h2o', 'no2_lif', 'no2_ncar','acn','hcn','co'...
-    'aerosol_extinction', 'aerosol_scattering','abs_angstr_exp','scat_angstr_exp','aerosol_ssa','aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
+    'aerosol_extinction', 'aerosol_extinction_green', 'aerosol_scattering', 'aerosol_scattering_green', 'abs_angstr_exp','scat_angstr_exp','aerosol_ssa',...
+    'aerosol_dry_ssa', 'profile_numbers','ground_no2','ground_utc'}';
 
 % Initialize the return variables
 for a=1:numel(return_fields)
@@ -64,7 +84,7 @@ range_files = {''};
 
 % All campaign data should be stored in a central directory, this is that
 % directory
-main_dir = '/Volumes/share2/USERS/LaughnerJ/CampaignMergeMats';
+main_dir = fullfile('/Volumes','share2','USERS','LaughnerJ','CampaignMergeMats');
 
 % Parse the campaign name and assign the fields
 
@@ -80,8 +100,10 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_LIF';
     Names.no2_ncar = 'NO2_NCAR';
-    Names.aerosol_extinction = 'EXTamb532';
-    Names.aerosol_scattering = 'SCamb532';
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXTamb532';
+    Names.aerosol_scattering_green = 'SCamb532';
     Names.abs_angstr_exp = 'Angstrom_Exponent_of_Absorption_at_450and550nm';
     Names.scat_angstr_exp = 'Angstrom_Exponent_of_Scattering_at_450and550nm';
     Names.aerosol_ssa = 'SingleScatteringAlbedo_at_550nmambient';
@@ -93,8 +115,8 @@ if ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name
                         '','UTC_stop','Stop_UTC','','Stop_UTC','UTC_stop'};
     
     dates = {'2011-07-01','2011-07-31'};
-    directory = fullfile(main_dir,'DISCOVER-AQ_MD/P3/1sec/');
-    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_MD/Ground/VariousTimePeriods/');
+    directory = fullfile(main_dir,'DISCOVER-AQ_MD','P3','1sec');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_MD','Ground','VariousTimePeriods');
 
 % DISCOVER-CA
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'ca'))
@@ -108,8 +130,10 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
-    Names.aerosol_extinction = 'EXTamb532_TSI_PSAP';
-    Names.aerosol_scattering = 'SCATamb532_TSI';
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXTamb532_TSI_PSAP';
+    Names.aerosol_scattering_green = 'SCATamb532_TSI';
     Names.abs_angstr_exp = 'AngstromExponenetABS_470to532';
     Names.scat_angstr_exp = 'AngstromExponenetSCAT_450to550';
     Names.aerosol_ssa = 'SingleScatAlbedo550amb_TSIneph_PSAP';
@@ -121,8 +145,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
                         'stop_secUTC','stop_secUTC','UTC_stop','','','UTC_stop'};
     
     dates = {'2013-01-16','2013-02-06'};
-    directory = fullfile(main_dir, 'DISCOVER-AQ_CA/P3/1sec/');
-    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CA/Ground/VariousTimePeriods/');
+    directory = fullfile(main_dir, 'DISCOVER-AQ_CA','P3','1sec');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CA','Ground','VariousTimePeriods');
     
 % DISCOVER-TX
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'tx'))
@@ -137,8 +161,10 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.h2o = 'H2O_MixingRatio';
     Names.no2_lif = 'NO2_MixingRatio_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
-    Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
-    Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXT532nmamb_total_LARGE';
+    Names.aerosol_scattering_green = 'SCAT550nmamb_total_LARGE';
     Names.abs_angstr_exp = 'AE_ABS_450to700nm_LARGE';
     Names.scat_angstr_exp = 'AE_SCAT_450to700nm_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
@@ -150,8 +176,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
                         'UTC_stop', 'StopTime_UTsec', 'stop_sec-UTC', 'StopTime', 'stop_sec-UTC', 'StopTime', '', 'StopTime'};
     
     dates = {'2013-09-01','2013-09-30'};
-    directory = fullfile(main_dir, 'DISCOVER-AQ_TX/P3/1sec/');
-    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_TX/Ground/VariousTimePeriods');
+    directory = fullfile(main_dir, 'DISCOVER-AQ_TX','P3','1sec');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_TX','Ground','VariousTimePeriods');
     
 % DISCOVER-CO
 elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_name,'co'))
@@ -166,8 +192,10 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
     Names.no2_lif = 'NO2_LIF';
     Names.no2_ncar = 'NO2_MixingRatio';
     Names.acn = 'Acetonitrile_MixingRatio';
-    Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
-    Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXT532nmamb_total_LARGE';
+    Names.aerosol_scattering_green = 'SCAT550nmamb_total_LARGE';
     Names.abs_angstr_exp = 'AE_ABSdry_450to700nm_LARGE';
     Names.scat_angstr_exp = 'AE_SCATamb_450to700nm_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_LARGE';
@@ -179,8 +207,8 @@ elseif ~isempty(regexpi(campaign_name,'discover')) && ~isempty(regexpi(campaign_
                         'stop_sec-UTC', 'Stop_UTC', 'stop_sec-UTC', '', 'UTC_stop', 'stop_sec-UTC'};
     
     dates = {'2014-07-17','2014-08-10'};
-    directory = fullfile(main_dir, 'DISCOVER-AQ_CO/P3/1sec/');
-    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CO/Ground/VariousTimePeriods');
+    directory = fullfile(main_dir, 'DISCOVER-AQ_CO','P3','1sec/');
+    ground_site_dir = fullfile(main_dir,'DISCOVER-AQ_CO','Ground','VariousTimePeriods');
     
 % SEAC4RS
 elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_name,'seacers'));
@@ -195,17 +223,24 @@ elseif ~isempty(regexpi(campaign_name,'seac4rs')) || ~isempty(regexpi(campaign_n
     Names.no2_lif = 'NO2_TDLIF';
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
     Names.co = 'CO_DACOM';
-    Names.acn = 'Acetonitrile';
-    Names.hcn = 'HCN_CIT';
-    Names.aerosol_extinction = 'EXT532nmamb_total_LARGE';
-    Names.aerosol_scattering = 'SCAT550nmamb_total_LARGE';
+    Names.acn = 'Acetonitrile'; % guessing this is Wisthaler's PTRMS 
+    Names.hcn = 'HCN_CIT'; % guessing this is Wennberg's CIT-CIMS
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXT532nmamb_total_LARGE';
+    Names.aerosol_scattering_green = 'SCAT550nmamb_total_LARGE';
     Names.aerosol_ssa = 'SSA550nmamb_TSIandPSAP_LARGE';
     Names.aerosol_dry_ssa = 'SSA550nmdry_TSIandPSAP_LARGE';
     
     dates = {'2013-08-06','2013-09-23'};
-    directory = fullfile(main_dir, 'SEAC4RS/DC8/1sec/');
+    directory = fullfile(main_dir, 'SEAC4RS','DC8','1sec');
     
-    range_files = {fullfile(main_dir, 'SEAC4RS/SEAC4RS_Profile_Ranges.mat')};
+    range_files = {fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_Std.mat'),...
+                    fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_Porpoising.mat'),...
+                    fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_Curtaining.mat'),...
+                    fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_StdFires.mat'),...
+                    fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_CurtainingFires.mat'),...
+                    fullfile(main_dir, 'SEAC4RS','SEAC4RS_Profile_Ranges_Std-plus-Curtaining.mat')};
 
 % DC3 (not to be confused with the DC8 aircraft)
 elseif ~isempty(regexpi(campaign_name,'dc3'))
@@ -219,13 +254,21 @@ elseif ~isempty(regexpi(campaign_name,'dc3'))
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_TDLIF';
     Names.no2_ncar = 'NO2_ESRL'; % This is Ryerson's NO2, not sure if that's different from Weinheimer's
-    Names.aerosol_extinction = 'EXTamb532nm_TSI_PSAP';
-    Names.aerosol_scattering = 'SCATamb532nm_TSI';
+    Names.co = 'CO_DACOM';
+    Names.acn = 'Acetonitrile_PTRMS'; % guessing this is Wisthaler's PTRMS 
+    Names.hcn = 'HCN_CIT';  % guessing this is Wennberg's CIT-CIMS
+    Names.aerosol_extinction = 'Lee_ext450nm_amb';
+    Names.aerosol_scattering = 'Lee_sc450nm_amb';
+    Names.aerosol_extinction_green = 'EXTamb532nm_TSI_PSAP';
+    Names.aerosol_scattering_green = 'SCATamb532nm_TSI';
     Names.aerosol_ssa = 'SingleScatAlbedo_amb550nm_TSIneph_PSAP';
     Names.aerosol_dry_ssa = 'SingleScatAlbedo_dry700nm_TSIneph_PSAP';
     
     dates = {'2012-05-18','2012-06-22'};
-    directory = fullfile(main_dir, 'DC3/DC8/1sec/');
+    directory = fullfile(main_dir, 'DC3','DC8','1sec');
+    
+    range_files = {fullfile(main_dir, 'DC3', 'DC3_Profile_Ranges_Std.mat'),...
+                    fullfile(main_dir, 'DC3', 'DC3_Profile_Ranges_Curtaining.mat')};
     
 % ARCTAS (-B and -CARB)
 elseif ~isempty(regexpi(campaign_name,'arctas'))
@@ -239,7 +282,10 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
     Names.theta = 'THETA';
     Names.no2_lif = 'NO2_UCB';
     Names.no2_ncar = 'NO2_NCAR';
-    Names.aerosol_extinction = 0;
+    Names.co = 'Carbon_Monoxide_mixing_ratio'; % Probably Glenn Diskin's DACOM CO
+    Names.acn = 'Acetonitrile_PTRMS'; % I think the ACN on SEAC4RS was the PTRMS, so being consistent
+    Names.hcn = 'HCN_CIT'; % Wennberg's CIT-CIMS
+    Names.aerosol_extinction = 'TotalExtinctionGreen'; % I calculated this by adding scattering and abs
     Names.aerosol_scattering = 'Total_Scatter550_nm';
     % For Arctas, it is not specified whether these are taken at ambient or
     % dry conditions.  Since other later campaigns only have dry data at
@@ -251,11 +297,13 @@ elseif ~isempty(regexpi(campaign_name,'arctas'))
     
     if ~isempty(regexpi(campaign_name,'carb'))
         dates = {'2008-06-18','2008-06-24'};
-        directory = fullfile(main_dir,'ARCTAS-CARB/DC8/1sec/');
-        range_files = {fullfile(main_dir, 'ARCTAS-CARB/ARCTAS-CA Altitude Ranges Exclusive 3.mat')};
+        directory = fullfile(main_dir,'ARCTAS-CARB','DC8','1sec');
+        range_files = {fullfile(main_dir, 'ARCTAS-CARB','ARCTAS-CA Altitude Ranges Exclusive 3.mat')};
     elseif ~isempty(regexpi(campaign_name,'b'))
         dates = {'2008-06-29','2008-07-13'};
-        directory = fullfile(main_dir,'ARCTAS-B/DC8/1sec/');
+        directory = fullfile(main_dir,'ARCTAS-B','DC8','1sec');
+    elseif nargout > 1
+        E.badinput('Campaign is one of the ARCTAS segments, but could not ID which one (carb or b)')
     end
     
 % INTEX-B
@@ -276,10 +324,10 @@ elseif ~isempty(regexpi(campaign_name,'intex')) && ~isempty(regexpi(campaign_nam
     Names.aerosol_dry_ssa = 0;
     
     dates = {'2006-03-04','2006-05-15'};
-    directory = fullfile(main_dir, 'INTEX-B/DC8/1sec/');
+    directory = fullfile(main_dir, 'INTEX-B','DC8','1sec');
     
-    range_files = {fullfile(main_dir, 'INTEX-B/INTEXB_Profile_UTC_Ranges.mat'),...
-                   fullfile(main_dir, 'INTEX-B/INTEXB_Profile_UTC_Ranges_Inclusive.mat')};
+    range_files = {fullfile(main_dir, 'INTEX-B','INTEXB_Profile_UTC_Ranges.mat'),...
+                   fullfile(main_dir, 'INTEX-B','INTEXB_Profile_UTC_Ranges_Inclusive.mat')};
 else
     error(E.badinput('Could not parse the given campaign name - see help for this function for suggestions of proper campaign names.'));
 end
@@ -291,7 +339,7 @@ end
 % string.  Only do this if the range file is actually output to a variable,
 % otherwise, don't waste the user's time.
 
-if nargout >= 4
+if nargout >= 4 && ask_ranges
     n = numel(range_files);
     if n == 1
         range_file = range_files{1};
@@ -316,6 +364,8 @@ if nargout >= 4
     else
         range_file = '';
     end
+else
+    range_file = '';
 end
 
 

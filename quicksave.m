@@ -19,33 +19,46 @@ savename = get(gcf,'FileName');
 if ~isempty(savename)
     ind = strfind(savename,'.');
     ind = ind(end);
-    savename = savename(1:ind-1); % remove the file extension
+    [~,savename] = fileparts(savename); % remove the file extension and path
 else
     savename = get(get(gca,'title'),'string');
+    if iscell(savename)
+        savename = savename{1};
+    end
     if ~isempty(savename)
-        savename = repexprep(savename,'[^\d\w_\/]');
+        savename = regexprep(savename,'[^\d\w_\ ]','');
     else
         savename = sprintf('Figure%d',get(gcf,'Number'));
-        % Do not save over another file named "FigureN" 
-        s=1;
-        savename_orig = savename;
-        while check_exist(savename)
-            savename = sprintf('%s-%02d',savename_orig,s);
-            s = s+1;
-        end
     end
-    % Set the figure filename so it knows what to do if you press the
-    % "save" icon
-    fullsavename = fullfile(pwd,strcat(savename,'.fig'));
-    set(gcf,'FileName',fullsavename)
+    savename = no_overwrite(savename);  
 end
 
-% All that just to get the filename! Now actually save.
-savefig(savename)
+savename = inputdlg('Enter the save name (no extension)','Quicksave',[1 128],{savename});
+if ~isempty(savename) && ~isempty(savename{1})
+    savename = savename{1};
+else
+    return
+end
+
+% All that just to get the filename! Now actually save,
+savefig(strcat(savename,'.fig'));
 saveas(gcf,savename,'jpg');
 
+% Set the figure filename so it knows what to do if you press the
+% "save" icon
+fullsavename = fullfile(pwd,strcat(savename,'.fig'));
+set(gcf,'FileName',fullsavename)
 
+end
 
+function savename = no_overwrite(savename)
+% Do not save over another file named "FigureN"
+s=1;
+savename_orig = savename;
+while check_exist(savename)
+    savename = sprintf('%s-%02d',savename_orig,s);
+    s = s+1;
+end
 end
 
 function e = check_exist(savename)

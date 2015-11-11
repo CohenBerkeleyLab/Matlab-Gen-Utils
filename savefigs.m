@@ -28,7 +28,7 @@ hfigs = get(0, 'children');                          %Get list of figures
 
 for m = 1:length(hfigs)
     figure(hfigs(m));                                %Bring Figure to foreground
-    filename = input('Filename? (0 to skip or blank to use title)  ', 's');%Prompt user
+    filename = input('Filename? (0 to skip or blank to use title with today''s date)  ', 's');%Prompt user
     if strcmp(filename, '0')                        %Skip figure when user types 0
         continue
     elseif strcmp(filename,'')
@@ -41,6 +41,13 @@ for m = 1:length(hfigs)
         end
         filename = strrep(filename,'/','-');
         filename = strrep(filename,':',' ');
+        filename = strrep(filename,'\','');
+        % Replace % signs with the word percent with reasonable
+        % capitalization
+        filename = regexprep(filename,'(?<=\w\s+)\%','percent'); % preceded by a letter before a whitespace - lowercase percent
+        filename = regexprep(filename, '%', 'Percent'); % otherwise capital
+        filename = strtrim(filename);
+        filename = sprintf('%s - %s',datestr(today,29),filename);
         fprintf('Saving figure %u as %s.\n',m,filename);
         saveas(hfigs(m), [filename, extension]);
     else
