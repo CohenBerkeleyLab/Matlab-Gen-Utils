@@ -27,6 +27,7 @@ else
     end
     if ~isempty(savename)
         savename = regexprep(savename,'[^\d\w_\ ]','');
+        savename = regexprep(savename,'\.','');
     else
         savename = sprintf('Figure%d',get(gcf,'Number'));
     end
