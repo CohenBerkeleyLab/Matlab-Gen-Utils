@@ -17,10 +17,13 @@ end
 % See if the file has been saved before, if so, we'll be saving over that
 savename = get(gcf,'FileName');
 if ~isempty(savename)
-    ind = strfind(savename,'.');
-    ind = ind(end);
-    [~,savename] = fileparts(savename); % remove the file extension and path
+    [savepath,savename] = fileparts(savename); % remove the file extension and path
 else
+    savepath = uigetdir;
+    if savepath == 0
+        fprintf('Canceled, not saving\n');
+        return
+    end
     savename = get(get(gca,'title'),'string');
     if iscell(savename)
         savename = savename{1};
@@ -41,13 +44,16 @@ else
     return
 end
 
+fullsavename = fullfile(savepath,savename);
+
 % All that just to get the filename! Now actually save,
-savefig(strcat(savename,'.fig'));
-saveas(gcf,savename,'jpg');
+fprintf('Saving as %s\n',fullsavename);
+savefig(strcat(fullsavename,'.fig'));
+saveas(gcf,fullsavename,'png');
 
 % Set the figure filename so it knows what to do if you press the
 % "save" icon
-fullsavename = fullfile(pwd,strcat(savename,'.fig'));
+
 set(gcf,'FileName',fullsavename)
 
 end
