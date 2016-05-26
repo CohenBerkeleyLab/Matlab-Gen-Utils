@@ -1,6 +1,7 @@
 function [ inds ] = find_nearest_gridpoint( x, y, Xgrid, Ygrid )
-%FIND_NEAREST_GRIDPOINT Finds the indices in Xgrid, Ygrid closest to x, y 
-%   Detailed explanation goes here
+%FIND_NEAREST_GRIDPOINT( x, y, Xgrid, Ygrid)
+%   Finds the indices in Xgrid, Ygrid closest to x, y. Returns those
+%   indices in a single 2x1 vector.
 
 E = JLLErrors;
 

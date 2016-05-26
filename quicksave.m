@@ -1,13 +1,10 @@
-function [  ] = quicksave( replace_bool )
+function [  ] = quicksave(  )
 %QUICKSAVE Quickly save the current figure as .fig and .png
 %   Utility function to save the current figure as both a .fig (for
 %   editing) and a .png (for looking at w/o matlab). If the figure has been
 %   saved before, it will resave over those files. If it hasn't been saved,
 %   it will save with the title or if the title is empty, the figure
 %   number. Both of the latter two will save in the current directory.
-%
-%   QUICKSAVE( true ) will open a file select dialogue to let you choose a
-%   file to save over instead.
 %
 %   Josh Laughner <joshlaugh5@gmail.com> 16 June 2015
 
@@ -17,51 +14,32 @@ if isempty(get(0,'children'))
     return
 end
 
-% If no input, assume we're not operating in replace mode.
-if ~exist('replace_bool','var')
-    replace_bool = false;
-end
-
 % See if the file has been saved before, if so, we'll be saving over that
-if ~replace_bool
-    savename = get(gcf,'FileName');
-    if ~isempty(savename)
-        [savepath,savename] = fileparts(savename); % remove the file extension and path
-    else
-        savepath = uigetdir;
-        if savepath == 0
-            fprintf('Cancelled, not saving\n');
-            return
-        end
-        savename = get(get(gca,'title'),'string');
-        if iscell(savename)
-            savename = savename{1};
-        end
-        if ~isempty(savename)
-            savename = regexprep(savename,'[^\d\w_\ \-]','');
-            savename = regexprep(savename,'\.','');
-        else
-            savename = sprintf('Figure%d',get(gcf,'Number'));
-        end
-        savename = no_overwrite(savename);
-    end
+savename = get(gcf,'FileName');
+if ~isempty(savename)
+    [savepath,savename] = fileparts(savename); % remove the file extension and extract path
 else
-    [savename, savepath] = uigetfile('*','Select a file to overwrite');
-    if savepath == 0
-        fprintf('Cancelled, not saving\n');
-        return
+    savepath = pwd;
+    savename = get(get(gca,'title'),'string');
+    if iscell(savename)
+        savename = savename{1};
     end
-    [~,savename] = fileparts(savename);
+    if ~isempty(savename)
+        savename = regexprep(savename,'[^\d\w_\ \-]','');
+        savename = regexprep(savename,'\.','');
+    else
+        savename = sprintf('Figure%d',get(gcf,'Number'));
+    end
+    savename = no_overwrite(savename); 
 end
 
-if ~replace_bool
-    savename = inputdlg('Enter the save name (no extension)','Quicksave',[1 128],{savename});
-    if ~isempty(savename) && ~isempty(savename{1})
-        savename = savename{1};
-    else
-        return
-    end
+[savename, savepath] = uiputfile('*','Quicksave figure as:',fullfile(savepath,savename));
+if savepath == 0
+    fprintf('Cancelled, not saving\n');
+    return
 end
+
+
 fullsavename = fullfile(savepath,savename);
 
 % All that just to get the filename! Now actually save,

@@ -1,4 +1,4 @@
-function ret = savefigs()
+function ret = savefigs(allflag)
 % This function allows you to quickly save all currently open figures with
 % a custom filename for each in multiple formats.  To use the function
 % simply call savefigs with no arguments, then follow the prompts
@@ -14,6 +14,12 @@ function ret = savefigs()
 % Copyright 2010 Matthew Guidry 
 % matt.guidry ATT gmail DOTT com  (Email reformatted for anti-spam)
 
+if exist('allflag','var') && strcmpi(allflag,'all')
+    all_bool = true;
+else
+    all_bool = false;
+end
+
 extension = input('Enter extension to use (blank for .fig). Include the dot.  ','s');
 
 if strcmp(extension,'')
@@ -28,10 +34,12 @@ hfigs = get(0, 'children');                          %Get list of figures
 
 for m = 1:length(hfigs)
     figure(hfigs(m));                                %Bring Figure to foreground
-    filename = input('Filename? (0 to skip or blank to use title with today''s date)  ', 's');%Prompt user
-    if strcmp(filename, '0')                        %Skip figure when user types 0
+    if ~all_bool
+        filename = input('Filename? (0 to skip or blank to use title with today''s date)  ', 's');%Prompt user
+    end    
+    if ~all_bool && strcmp(filename, '0')                        %Skip figure when user types 0
         continue
-    elseif strcmp(filename,'')
+    elseif all_bool || strcmp(filename,'')
         ax = findall(gcf,'Type','axes');
         for i=1:numel(ax)
             htitle = get(ax(i),'Title');
