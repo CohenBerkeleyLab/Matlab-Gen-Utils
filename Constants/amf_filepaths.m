@@ -13,7 +13,8 @@ end
 if onCluster
     amf_tools_path = '/global/home/users/laughner/MATLAB/BEHR/AMF_tools';
 else
-    amf_tools_path = '/Users/Josh/Documents/MATLAB/BEHR/AMF_tools';
+    homedir = getenv('HOME');
+    amf_tools_path = sprintf('%s/Documents/MATLAB/BEHR/AMF_tools',homedir);
 end
 
 fileTmp = fullfile(amf_tools_path,'nmcTmpYr.txt');
