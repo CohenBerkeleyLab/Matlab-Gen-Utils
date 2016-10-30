@@ -1,18 +1,46 @@
 function ret = savefigs(allflag)
+% SAVEFIGS Quickly save all open figures
+%
 % This function allows you to quickly save all currently open figures with
 % a custom filename for each in multiple formats.  To use the function
 % simply call savefigs with no arguments, then follow the prompts
 %
-% Upon execution this function will one-by-one bring each currently open
-% figure to the foreground.  Then it will supply a text prompt in the main
-% console window asking you for a filename.  It will save that figure to
-% that filename in the .fig, .emf, .png, and .eps formats.  
+% Upon execution this function will first ask what type of file to save by
+% extension. Accepted extensions are:
+%       .fig
+%       .cmp
+%       .emf
+%       .eps
+%       .jpg
+%       .pbm
+%       .pcx
+%       .pdf
+%       .pgm
+%       .png
+%       .ppm
+%       .tif
 %
-% The formats that it saves in can be changed by commenting out or adding
-% lines below.
+% It will then one-by-one bring each currently open figure to the foreground
+% and supply a text prompt in the main console window asking you for a
+% filename. If you enter a blank string, it will save the figure with its
+% title (after some reformatting to make it path safe, see below) and
+% todays date.
+%
+% Some characters will be removed or changed to make titles path safe:
+%       / replaced by -
+%       : replaced by -
+%       \ removed
+%       % replaced by "percent"
+%
+% 
+% SAVEFIGS ALL will ask for an extension, but then will save every open
+% figure in the current directory using its title and todays date as the
+% filename.
 %
 % Copyright 2010 Matthew Guidry 
 % matt.guidry ATT gmail DOTT com  (Email reformatted for anti-spam)
+% Modified 2016 Josh Laughner
+
 
 if exist('allflag','var') && strcmpi(allflag,'all')
     all_bool = true;
@@ -32,6 +60,10 @@ fprintf('Extension %s accepted.\n',extension);
 pause
 hfigs = get(0, 'children');                          %Get list of figures
 
+if all_bool
+    extra_name = input('If you wish, enter something to append to each filename: ', 's');
+end
+
 for m = 1:length(hfigs)
     figure(hfigs(m));                                %Bring Figure to foreground
     if ~all_bool
@@ -45,10 +77,13 @@ for m = 1:length(hfigs)
             htitle = get(ax(i),'Title');
             filename = strtrim(get(htitle,'String'));
             if iscell(filename); filename = cat_str_in_cell(filename); end
+            if all_bool && ~isempty(extra_name)
+                filename = [filename, ' ',extra_name];
+            end
             if ~isempty(filename); break; end
         end
         filename = strrep(filename,'/','-');
-        filename = strrep(filename,':',' ');
+        filename = strrep(filename,':','-');
         filename = strrep(filename,'\','');
         % Replace % signs with the word percent with reasonable
         % capitalization
