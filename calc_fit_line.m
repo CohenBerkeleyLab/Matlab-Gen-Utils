@@ -42,14 +42,19 @@ function [ line_x, line_y, legend_str, LineData ] = calc_fit_line( x, y, varargi
 %
 %       'dataxlim' - line will have x coordinates as the min and max of the
 %       data.
+%
+%       [xcoords] - giving a monotonically increasing numeric vector will
+%       generate the line using those values as the x-coordinates.
+
+E = JLLErrors;
 
 default_x_coord = 0:1;
 
 p = inputParser;
 p.addRequired('x',@isnumeric);
 p.addRequired('y',@isnumeric);
-p.addParameter('regression','y-resid',@(x) any(strcmpi(x,{'y-resid','x-resid','majoraxis','RMA'})));
-p.addParameter('xcoord','figxlim',@(x) any(strcmpi(x, {'figxlim', 'dataxlim'})));
+p.addParameter('regression','y-resid');
+p.addParameter('xcoord','figxlim');
 
 p.parse(x,y,varargin{:});
 pout = p.Results;
@@ -57,6 +62,19 @@ x = pout.x;
 y = pout.y;
 regression = lower(pout.regression); % explicitly make the regression string lower case to ease comparison in the switch-case statement
 xcoord = lower(pout.xcoord);
+
+allowed_regressions = {'y-resid','x-resid','majoraxis','RMA'};
+if ~any(strcmpi(regression, allowed_regressions))
+    E.badinput('The parameter ''REGRESSION'' must be one of %s', strjoin(allowed_regressions, ', '));
+end
+allowed_xcoords = {'figxlim','dataxlim'};
+if isnumeric(xcoord)
+    if numel(xcoord) < 2 || ~isvector(xcoord) || any(diff(xcoord) < 0)
+        E.badinput('If giving the parameter ''XCOORD'' as numeric values, it must be a monotonically increasing vector with at least two elements');
+    end
+elseif ischar(xcoord) && ~any(strcmpi(xcoord, allowed_xcoords)) || ~ischar(xcoord)
+    E.badinput('The parameter ''XCOORD'' must be a numerical vector or one of the strings %s', strjoin(allowed_xcoords, ', ')); 
+end
 
 if any(isnan(x)) || any(isnan(y))
     warning('NaNs detected, removing any points with a value of NaN for either coordinate');
@@ -93,7 +111,9 @@ LineData.StdDevM = sigma_m;
 LineData.StdDevB = sigma_b;
 LineData.p_value = p_val;
    
-if strcmp(xcoord, 'figxlim') && ~isempty(get(0,'children'))
+if isnumeric(xcoord)
+    line_x = xcoord;
+elseif strcmp(xcoord, 'figxlim') && ~isempty(get(0,'children'))
     line_x = get(gca,'xlim');
 elseif strcmp(xcoord, 'dataxlim')
     line_x = [min(x(:)), max(x(:))];

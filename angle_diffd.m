@@ -7,13 +7,21 @@ function [ del_theta ] = angle_diffd( theta_1, theta_2 )
 %       THETA_1(i) - THETA_2(i) + 360
 %       THETA_1(i) - THETA_2(i) - 360
 %
+%   THETA_2 may be a scalar, in which case that value is used for all
+%   indices i.
+%
 %   The sign of the value is retained; in this way, the issue of dealing
 %   with differences in angle near 0 or 360 is dealt with. Angles are to be
 %   given in degrees between 0 and 360.
 
 E = JLLErrors;
+
+if isscalar(theta_2)
+    theta_2 = repmat(theta_2, size(theta_1));
+end
+
 if ~isequal(size(theta_1), size(theta_2))
-    E.badinput('THETA_1 and THETA_2 must be the same size');
+    E.badinput('THETA_1 and THETA_2 must be the same size, unless THETA_2 is a scalar');
 elseif ~isnumeric(theta_1) || ~isnumeric(theta_2)
     E.badinput('THETA_1 and THETA_2 must be numeric');
 end
