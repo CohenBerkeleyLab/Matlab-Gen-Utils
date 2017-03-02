@@ -69,17 +69,14 @@ classdef GlobeGrid < handle
     properties(SetAccess = protected)
         DomainLon = [-180 180];
         DomainLat = [-90 90];
+        GridCenterLon = 0;
+        GridCenterLat = 0;
     end
     properties(Dependent = true, SetAccess = private)
         GridLon
         GridLat
         GridLoncorn
         GridLatcorn
-        GridCenterLon
-        GridCenterLat
-    end
-    properties(Hidden,Transient)
-        ProjectionSet = matlab.system.StringSet({'equirectangular','equirect-rotated'})
     end
     
     methods
@@ -139,11 +136,15 @@ classdef GlobeGrid < handle
             obj.check_domain;
         end
         
-%         function set.Projection(obj, val)
-%             if ~ismember(val, obj.ProjectionSet)
-%                 error('MATLAB:datatypes:InvalidEnumValue','When setting the Projection value of GlobeGrid:\n''%s'' is not a valid value. It must be one of %s', val, strjoin(obj.ProjectionSet))
-%             end
-%         end
+        function set.Projection(obj, val)
+            allowed_proj = {'equirectangular','equirect-rotated'};
+            if ~ischar(val) || ~ismember(val, allowed_proj)
+                % Use the same identifier as when setting an invalid
+                % property for a graphics handle, should help consistency
+                error('MATLAB:datatypes:InvalidEnumValue','When setting the Projection value of GlobeGrid:\n''%s'' is not a valid value. It must be one of %s', val, strjoin(allowed_proj, ','))
+            end
+            obj.Projection = val;
+        end
         
         function SetDomain(obj, varargin)
             if numel(varargin) == 1 && ischar(varargin{1})
@@ -360,15 +361,6 @@ classdef GlobeGrid < handle
                 lat(a) = v(2) + center_lat;
             end
         end
-        
-%         function obj = loadobj(s)
-%             disp('calling load obj')
-%             if isstruct(s)
-%                 obj = GlobeGrid(s.LonRes, s.LatRes, 'projection', s.Projection, 'rotation', s.Rotation);
-%             else
-%                 error('gg:notastruct','not a struct');
-%             end
-%         end
     end
     
 end
