@@ -1,6 +1,8 @@
 function [ v ] = veccat( varargin )
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+%VECCAT Concatenate vectors along their non-singleton dimension
+%   V = VECCAT( V1, V2, ... ) Concatenate the vectors V1, V2, etc. along
+%   their long dimension. All inputs must be scalars or the same vector
+%   type (i.e. row or column).
 
 E = JLLErrors;
 
