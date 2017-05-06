@@ -1,4 +1,4 @@
-function [ inds ] = find_submatrix2( submatx, submaty, parmatx, parmaty, tolerance )
+function [ varargout ] = find_submatrix2( submatx, submaty, parmatx, parmaty, tolerance )
 %FIND_SUBMATRIX2 Identifies the indicies where a smaller matrix exists in a larger one
 %   This function searches parmat for the location of submat. This version
 %   assumes that the matrices describe an x and y coordinate, thus there
@@ -38,6 +38,10 @@ if any(size(submatx) > size(parmatx))
     E.badinput('The submats must be smaller than the parmats')
 end
 
+if any(isnan([submatx(:); submaty(:); parmatx(:); parmaty(:)]))
+    E.badinput('FIND_SUBMATRIX2 cannot accept matrices with NaNs')
+end
+
 if ~exist('tolerance','var')
     tolerance = 0.1;
 end
@@ -53,8 +57,8 @@ yy1 = abs((parmaty - submaty(1))/submaty(1)) * 100 < tolerance;
 zz1 = xx1 & yy1;
 
 % Find where it ends
-xx2 = abs(parmatx - submatx(end))/submatx(end) * 100 < tolerance;
-yy2 = abs(parmaty - submaty(end))/submaty(end) * 100 < tolerance;
+xx2 = abs((parmatx - submatx(end))/submatx(end)) * 100 < tolerance;
+yy2 = abs((parmaty - submaty(end))/submaty(end)) * 100 < tolerance;
 
 zz2 = xx2 & yy2;
 
@@ -77,6 +81,11 @@ elseif any(parmatx_sub(:) - submatx(:) > tolerance) || any(parmaty_sub(:) - subm
     E.callError('bad_solution','The identified subset in parmats is the same size, but it''s elements do not match to within %f%%',tolerance);
 end
 
-inds = [i1, i2; j1, j2];
+nargoutchk(0,2);
+if nargout <= 1
+    varargout{1} = [i1, i2; j1, j2];
+elseif nargout == 2
+    varargout = {i1:i2; j1:j2};
+end
 end
 

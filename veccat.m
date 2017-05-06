@@ -18,7 +18,7 @@ for a=1:numel(varargin)
             first_is_row = isrow(varargin{a});
         end
     end
-    if isrow(varargin{a}) ~= first_is_row
+    if isrow(varargin{a}) ~= first_is_row && ~isscalar(varargin{a})
         E.badinput('All inputs to VECCAT must be the same sort of vector (row or column). This function does not handle mixed vector types')
     elseif ~isvector(varargin{a})
         E.badinput('VECCAT only concatenates vectors')
