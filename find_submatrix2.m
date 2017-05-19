@@ -6,7 +6,10 @@ function [ varargout ] = find_submatrix2( submatx, submaty, parmatx, parmaty, to
 %   (parent matrix). An example of the application of this function is if
 %   you have a subset of satellite pixels (which have a latitude and
 %   longitude) that you want to find where they came from in the full array
-%   of pixels.
+%   of pixels. This assumes that the submatrices are contiguous in the
+%   parent matrices, so it finds the location of the first and last points
+%   of the submatrices in the parent matrices and assumes that those
+%   describe a rectangular block that is the submatrix location.
 %
 %   The fifth input (tolerance) is optional. It describes the allowable
 %   percent difference between the two values to be considered the same. It
@@ -38,8 +41,8 @@ if any(size(submatx) > size(parmatx))
     E.badinput('The submats must be smaller than the parmats')
 end
 
-if any(isnan([submatx(:); submaty(:); parmatx(:); parmaty(:)]))
-    E.badinput('FIND_SUBMATRIX2 cannot accept matrices with NaNs')
+if any(isnan([submatx(1); submatx(end); submaty(1); submaty(end)]))
+    E.badinput('The first and last points in both SUBMATX and SUBMATY cannot be NaNs')
 end
 
 if ~exist('tolerance','var')
@@ -63,7 +66,12 @@ yy2 = abs((parmaty - submaty(end))/submaty(end)) * 100 < tolerance;
 zz2 = xx2 & yy2;
 
 if sum(zz1(:)) == 0 || sum(zz2(:)) == 0
-    inds = [];
+    nargoutchk(0,2);
+    if nargout <= 1
+        varargout{1} = [];
+    elseif nargout == 2
+        varargout = {[], []};
+    end
     return
 elseif sum(zz1(:)) > 1 || sum(zz2(:)) > 1
     E.callError('bad_solution','The starting and ending coordinates are not unique. Try a tighter tolerance than %f',tolerance);
