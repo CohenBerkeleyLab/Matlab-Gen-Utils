@@ -1,6 +1,30 @@
 classdef GitChecker < handle
-    %UNTITLED5 Summary of this class goes here
-    %   Detailed explanation goes here
+    %GitChecker Use to verify that a dependency's Git repo is in the proper state
+    %   Particularly in Matlab, where you can set a very wide search path
+    %   to look for .m files, you may have code in one or more Git
+    %   repositories that depends on code in another. Because Matlab will
+    %   look through its search path and find the first file that matches a
+    %   function call, there's no (easy) way to have two versions of
+    %   function foo() in repository D that are needed for functions bar()
+    %   and baz() in repositories A and B. If foo() has two different
+    %   versions in two branches of D, you run the risk of using the wrong
+    %   version of foo() for bar() or baz().
+    %
+    %   This class offers a way to prevent that. By adding an instance of
+    %   this class to the beginning of a function call, you can verify that
+    %   a second repository is in the state you want.
+    %
+    %   Usage: create an instance of this class, e.g. G = GitChecker(), and
+    %   use the methods addAllowedBranches(), addReqCommits(), and
+    %   addCommitRange() to specify rules for one or more repositories.
+    %   (Use the classhelp function in this repository to get more
+    %   information on those methods.)
+    %
+    %   There are also two properties which can be set to true to control
+    %   the behavior of this instance. Strict will, if true, cause an error
+    %   to automatically be thrown if any of the repository state
+    %   conditions are not met. Verbose will cause more information to be
+    %   printed to the screen.
     
     properties
         Strict = false;
@@ -124,6 +148,7 @@ classdef GitChecker < handle
                     cd(currdir);
                     rethrow(err);
                 end
+                cd(currdir);
                 
                 % If we get here, the test should have failed, but let's be
                 % sure
@@ -136,9 +161,8 @@ classdef GitChecker < handle
                     end
                 end
             end
-            cd(currdir);
-            stat = all(stats);
-                
+            
+            stat = all(stats);   
         end
         
         function stat = checkReqCommits(obj, gitdir)
@@ -165,6 +189,7 @@ classdef GitChecker < handle
                     cd(currdir);
                     rethrow(err);
                 end
+                cd(currdir);
                 
                 if ~stats(a)
                     msg = sprintf('Required commits (%s) not ancestors of current HEAD for %s\n', strjoin(obj.Dirs(i).req_commits, ', '), obj.Dirs(i).directory);
@@ -175,7 +200,6 @@ classdef GitChecker < handle
                     end
                 end
             end
-            cd(currdir);
             stat = all(stats);
         end
         
@@ -206,6 +230,7 @@ classdef GitChecker < handle
                     cd(currdir);
                     rethrow(err);
                 end
+                cd(currdir);
                 
                 if ~stats(a)
                     msg = sprintf('HEAD for %s not in any of the allowed commit ranges', obj.Dirs(i).directory);
@@ -216,7 +241,6 @@ classdef GitChecker < handle
                     end
                 end
             end
-            cd(currdir);
             stat = all(stats);
         end
     end

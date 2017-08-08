@@ -247,6 +247,28 @@ classdef GlobeGrid < handle
             end
         end
         
+        function grid_info = OmiGridInfo(obj)
+            % Returns a representation of this grid as a Python omi.Grid
+            % object.
+            if ~strcmpi(obj.Projection, 'equirectangular')
+                error('globegrid:omi_grid_format', 'Cannot convert a non-equirectangular grid to a Python omi.Grid instance');
+            elseif obj.LonRes ~= obj.LatRes
+                error('globegrid:omi_grid_format', 'Cannot convert a grid with different lon/lat resolutions to a Python omi.Grid instance');
+            end
+            
+            % The omi.Grid constructor takes the lower left and upper right
+            % corners. However, the upper right corner is exclusive (i.e.
+            % it's not included) so we add an extra bit to that corner to
+            % ensure the right- and top- most rows are included
+            
+            info_struct.llcrnrlon = min(obj.GridLon(:,1));
+            info_struct.urcrnrlon = max(obj.GridLon(:,1)) + obj.LonRes / 2;
+            info_struct.llcrnrlat = min(obj.GridLat(1,:));
+            info_struct.urcrnrlat = max(obj.GridLat(1,:)) + obj.LatRes / 2;
+            info_struct.resolution = obj.LonRes;
+            
+            grid_info = struct2pydict(info_struct);
+        end
     end
     
     methods(Access=private)
