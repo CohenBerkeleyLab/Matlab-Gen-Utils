@@ -1,4 +1,4 @@
-function [ LineData ] = plot_fit_line( x, y, varargin )
+function [ LineData ] = plot_fit_line( x, varargin )
 %plot_fit_line Draws a fit line and 1:1 line on the current figure.
 %   Automatically draws a fit line on the current plot (given the data on
 %   the plot as input variables - i.e. after plot(x,y) call
@@ -54,7 +54,7 @@ p.addParameter('regression','y-resid',@(x) any(strcmpi(x,{'y-resid','x-resid','m
 p.addParameter('sigma_m',0,@isscalar);
 p.addParameter('sigma_b',0,@isscalar);
 
-p.parse(x,y,varargin{:});
+p.parse(x,varargin{:});
 pout = p.Results;
 x = pout.x;
 y = pout.y;
@@ -83,37 +83,12 @@ if any(isnan(x)) || any(isnan(y))
     x = x(~nans); y = y(~nans);
 end
 
-switch regression
-    case 'y-resid'
-        [P(1), P(2), R, sigma_m, sigma_b] = lsqfity(x,y);
-        R = R^2; % All of the lsqfit** functions do not square R before returning
-        
-    case 'x-resid'
-        [P(1), P(2), R, sigma_m, sigma_b] = lsqfitx(x,y);
-        
-    case 'majoraxis'
-        [P(1), P(2), R, sigma_m, sigma_b] = lsqfitma(x,y);
-        R = R^2; % lsqfitma does not square R before returning.
-        
-    case 'rma'
-        [P(1), P(2), R, sigma_m, sigma_b] = lsqfitgm(x,y);
-        R = R^2;
-end
-
-p_val = p_val_slope(P(1),sigma_m,sum(~isnan(x) & ~isnan(y)));
-
-LineData.P = P;
-LineData.R2 = R;
-LineData.StdDevM = sigma_m;
-LineData.StdDevB = sigma_b;
-LineData.p_value = p_val;
+[xline, yline, lstr, LineData] = calc_fit_line(x, y, 'regression', regression);
 
 % Plot the line of best fit and format the string for the legend with the
 % slope/intercept info and the R^2 value.
-xline = get(gca,'xlim');%0:1e16:1e17;
-yline = polyval(P,xline);
 h(1) = line(xline,yline,'color','k','linestyle','--','linewidth',2);
-legendcell = {sprintf('Fit: %.4fx + %.2g \nR^2 = %.4f (p = %.2f)',P(1),P(2),R,p_val)};
+legendcell = {lstr};
 
 % Plot the 1:1 line
 if one2one
@@ -128,11 +103,11 @@ end
 % deviations will be multiplied by the parameters sigma_m and sigma_b, so
 % as to allow the user to plot a 2-sigma envelope.
 if mult_sigma_m > 0 || mult_sigma_b > 0
-    slope_plus_sigma = P(1) + sigma_m * mult_sigma_m;
-    int_plus_sigma = P(2) + sigma_b * mult_sigma_b;
+    slope_plus_sigma = LineData.P(1) + LineData.sigma_m * mult_sigma_m;
+    int_plus_sigma = LineData.P(2) + LineData.sigma_b * mult_sigma_b;
     
-    slope_minus_sigma = P(1) - sigma_m * mult_sigma_m;
-    int_minus_sigma = P(2) - sigma_b * mult_sigma_b;
+    slope_minus_sigma = LineData.P(1) - LineData.sigma_m * mult_sigma_m;
+    int_minus_sigma = LineData.P(2) - LineData.sigma_b * mult_sigma_b;
     
     P_upper = [slope_plus_sigma, int_plus_sigma];
     P_lower = [slope_minus_sigma, int_minus_sigma];

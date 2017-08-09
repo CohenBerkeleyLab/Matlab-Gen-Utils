@@ -25,6 +25,10 @@ function [ line_x, line_y, legend_str, LineData ] = calc_fit_line( x, y, varargi
 %       y have the same units and scale, and if both x & y have
 %       non-negligible error.
 %
+%       'orth-origin' - minimized the mean square orthogonal difference
+%       between the points and the slope, forcing the slope through the
+%       origin.
+%
 %       'RMA' - takes a geometric mean of the y-on-x and x-on-y regression.
 %       Effectively minimizes the area of a triangle between each point and
 %       the fit line. Most computationally expensive, but good when x & y
@@ -63,7 +67,7 @@ y = pout.y;
 regression = lower(pout.regression); % explicitly make the regression string lower case to ease comparison in the switch-case statement
 xcoord = lower(pout.xcoord);
 
-allowed_regressions = {'y-resid','x-resid','majoraxis','RMA'};
+allowed_regressions = {'y-resid','x-resid','majoraxis','RMA','orth-origin'};
 if ~any(strcmpi(regression, allowed_regressions))
     E.badinput('The parameter ''REGRESSION'' must be one of %s', strjoin(allowed_regressions, ', '));
 end
@@ -101,6 +105,12 @@ switch regression
     case 'rma'
         [P(1), P(2), R, sigma_m, sigma_b] = lsqfitgm(x,y);
         R = R^2;
+        
+    case 'orth-origin'
+        [P(1), sigma_m] = lsqfitnmorg(x,y);
+        P(2) = nan;
+        R = nan;
+        sigma_b = nan;
 end
 
 p_val = p_val_slope(P(1), sigma_m, sum(~isnan(x) & ~isnan(y)));
@@ -120,8 +130,19 @@ elseif strcmp(xcoord, 'dataxlim')
 else
     line_x = default_x_coord;
 end
-line_y = polyval(P,line_x);
-legend_str = sprintf('Fit: %.4fx + %.2g \nR^2 = %.4f (p = %.2f)',P(1),P(2),R,p_val);
+line_y = P(1) * line_x;
+if ~isnan(P(2))
+    line_y = line_y + P(2);
+end
+
+
+legend_str = sprintf('Fit: %.4fx',P(1));
+if ~isnan(P(2))
+    legend_str = [ legend_str, sprintf(' + %.2g', P(2)) ];
+end
+if ~isnan(R)
+    legend_str = [ legend_str, sprintf(' \nR^2 = %.4f (p = %.2f)',R,p_val) ];
+end
 
 end
 

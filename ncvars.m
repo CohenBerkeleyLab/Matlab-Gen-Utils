@@ -21,6 +21,13 @@ elseif ~ischar(pattern)
     E.badinput('PATTERN must be a string')
 end
 
+maxlen = 20;
+for a=1:numel(nci.Variables)
+    if length(nci.Variables(a).Name) > maxlen
+        maxlen = length(nci.Variables(a).Name);
+    end
+end
+
 for a=1:numel(nci.Variables)
     if ~isempty(pattern)
         if isempty(regexpi(nci.Variables(a).Name, pattern,'once'))
@@ -40,7 +47,7 @@ for a=1:numel(nci.Variables)
     else
         dimstr = 'No dimensions';
     end
-    space = repmat(' ',1,20-length(nci.Variables(a).Name));
+    space = repmat(' ',1,maxlen-length(nci.Variables(a).Name)+1); % ensure always at least one space
     fprintf('\t%02d: %s:%s%s\n', a, nci.Variables(a).Name, space, dimstr);
 end
 
