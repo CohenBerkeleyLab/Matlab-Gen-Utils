@@ -147,6 +147,19 @@ classdef GlobeGrid < handle
         end
         
         function SetDomain(obj, varargin)
+            % Set the domain either by name, by edges, or by center point
+            % and width. 
+            %
+            % To set by name, give as input one of the strings
+            % 'world' or 'us' ('us' covers the continental US 125 to 65 W,
+            % 25 to 50 N). 
+            %
+            % To set by edges, give a 4-element vector with
+            % values [lonmin, lonmax, latmin, latmax]. 
+            %
+            % To set by center and width requires two inputs: the center in
+            % degrees as [lon, lat] and the width in degrees as [size west,
+            % size east, size south, size north].
             if numel(varargin) == 1 && ischar(varargin{1})
                 obj.SetDomainByName(varargin{1});
             elseif numel(varargin) == 1 && isnumeric(varargin{1}) && numel(varargin{1}) == 4
