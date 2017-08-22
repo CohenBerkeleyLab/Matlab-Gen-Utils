@@ -23,11 +23,14 @@ classdef GitChecker < handle
     %   There are also two properties which can be set to true to control
     %   the behavior of this instance. Strict will, if true, cause an error
     %   to automatically be thrown if any of the repository state
-    %   conditions are not met. Verbose will cause more information to be
-    %   printed to the screen.
+    %   conditions are not met (this is the default).  You can set this to
+    %   false instead so that the check methods return a boolean for
+    %   success or failure, which you must then handle yourself. Verbose
+    %   will cause more information to be printed to the screen if set to
+    %   true (default is false).
     
     properties
-        Strict = false;
+        Strict = true;
         Verbose = false;
     end
     properties(SetAccess = protected)
