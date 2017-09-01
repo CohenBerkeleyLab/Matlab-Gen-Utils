@@ -485,6 +485,7 @@ classdef JLLErrors<handle
         function errstruct = makeErrStruct(obj, tag, msg)
             errid = sprintf('%s:%s',obj.callingfxn,tag);
             errid = strrep(errid, '/', ':');
+            errid = strrep(errid, '.', ':');
             stack = dbstack(2,'-completenames');
             errstruct = struct('identifier',errid,'message',msg,'stack',stack);
         end
