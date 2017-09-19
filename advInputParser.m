@@ -1,5 +1,5 @@
 classdef advInputParser < handle
-    %UNTITLED2 Summary of this class goes here
+    %ADVINPUTPARSER Improved version of the standard input parser (WIP)
     %   Detailed explanation goes here
     
     properties

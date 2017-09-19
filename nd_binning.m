@@ -1,6 +1,36 @@
 function [ top_bins, hist_mat, centers, edges ] = nd_binning( points, binmode, bins, varnames )
-%UNTITLED10 Summary of this function goes here
-%   Detailed explanation goes here
+%ND_BINNING Bin data in N-dimensional space
+%   For 1D data, it is fairly straightforward to divide the data into bins
+%   and count how many data points fall into each bin in order to generate
+%   a histogram. This function generalizes that process to N dimensions.
+%
+%   [ TOP_BINS, HIST_MAT, CENTERS, EDGES ] = ND_BINNING( POINTS, BINMODE,
+%   BINS ) POINTS is a 2D array giving each data point as a row. For
+%   example, if each data point in your data is defined by 3 variables (x,
+%   y, z), then POINTS should have the form:
+%
+%       x_1   y_1   z_1
+%       x_2   y_2   z_2
+%        .     .     .
+%        .     .     .
+%        .     .     .
+%       x_n   y_n   z_n
+%
+%   BINMODE and BINS control how the arrangement of bins is decided,
+%   currently the only permissible value for BINMODE is 'nbins', for which
+%   BINS specifies the number of bins in each dimension.
+%
+%   TOP_BINS is a table that gives the center point of each of the top 10
+%   most populated bins, followed by the number and percentage of data
+%   points in that bin and its edges. HIST_MAT will be an ND array
+%   representing the number of data points in each bin. The bin centers and
+%   edges for each dimension are specified by the cell arrays CENTERS and
+%   EDGES.
+%
+%   
+%   [ ___ ] = ND_BINNING( ___, VARNAMES ) By default, in TOP_BINS the
+%   center points of each bin are labeled "Var1", "Var2", etc. By passing
+%   the cell array of strings VARNAMES, you can override that naming.
 
 E=JLLErrors;
 
@@ -28,7 +58,7 @@ end
 if ~exist('varnames','var')
     varnames = cell(1,size(points,2));
     for a=1:numel(varnames)
-        varnames{a} = sprintf('Var %d',a);
+        varnames{a} = sprintf('Var%d',a);
     end
 end
 varnames{end+1} = 'Count';

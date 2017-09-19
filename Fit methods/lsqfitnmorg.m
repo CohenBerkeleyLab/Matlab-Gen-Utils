@@ -1,6 +1,11 @@
 function [ m, sm ] = lsqfitnmorg( x, y )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%LSQFITNMORG Do a least-squares fit of data, passing through the origin
+%   [ M, SM ] = LSQFITNMORG( X, Y ) Fits a line to data defined by X, Y,
+%   minimizing the orthogonal distance from the line to each point (x_i,
+%   y_i) using a SVD decomposition, and forcing the line to pass through
+%   the origin. This is best when X and Y have comparable uncertainties and
+%   there is good reason to assume no offset, i.e. Y = 0 when X = 0.
+%   Returns the slope, M, and the standard deviation of that slope, SM.
 
 
 % https://www.mathworks.com/matlabcentral/newsreader/view_thread/172430

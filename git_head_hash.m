@@ -1,8 +1,10 @@
 function [ githead ] = git_head_hash( git_dir )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%GIT_HEAD_HASH Return the hash of the HEAD of a Git repository
+%   GITHEAD = GIT_HEAD_HASH( GIT_DIR ) Returns the full hexadecimal SHA
+%   commit hash of the commit pointed to by HEAD in the repository GIT_DIR.
+%   Requires that a system call to "git" is possible on this machine.
 
-currdir = cd(behr_repo_dir);
+currdir = cd(git_dir);
 try
     [gitstat, githead] = system('git rev-parse HEAD');
 catch err
