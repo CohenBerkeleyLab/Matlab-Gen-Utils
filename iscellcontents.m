@@ -15,9 +15,9 @@ E = JLLErrors;
 
 narginchk(2,2);
 if ~iscell(cell_in)
-    error(E.badinput('"cell_in" must be a cell array'));
+    E.badinput('"cell_in" must be a cell array');
 elseif ~ischar(test_fxn) && ~isa(test_fxn,'function_handle')
-    error(E.badinput('"test_fxn" must be a string or function handle'));
+    E.badinput('"test_fxn" must be a string or function handle');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +38,7 @@ for a=1:numel(cell_in)
         % Handle the case where the user passed an invalid function name
         % specially
         if strcmp(err.identifier,'MATLAB:UndefinedFunction')
-            error(E.badinput('The function "%s" does not appear to be a valid function.  Check the spelling. If it is a build-in function, check your toolboxes. If it is a custom function, check that it is on the search path.',test_fxn));
+            E.badinput('The function "%s" does not appear to be a valid function.  Check the spelling. If it is a build-in function, check your toolboxes. If it is a custom function, check that it is on the search path.',test_fxn);
         else
             rethrow(err);
         end
@@ -48,10 +48,10 @@ for a=1:numel(cell_in)
     % it should be a scalar and have a value of 1 or 0.
     if isscalar(this_chk)
         if this_chk ~= 1 && this_chk ~= 0
-            error(E.callError('logical_test_failure',sprintf('The output to %s should be 1 or 0 - only logical test functions should be used',test_fxn)));
+            E.callError('logical_test_failure',sprintf('The output to %s should be 1 or 0 - only logical test functions should be used',test_fxn));
         end
     else
-        error(E.callError('logical_test_failure',sprintf('The output to %s should be scalar - iscellcontents is meant to test the type of variable in each cell array',test_fxn)));
+        E.callError('logical_test_failure',sprintf('The output to the test function should be scalar - iscellcontents is meant to test the type of variable in each cell array'));
     end
     
     % If the output of the test function makes sense, save it to the output

@@ -147,9 +147,9 @@ classdef JLLErrors<handle
             error(errstruct);
         end
         
-        function errstruct = badgeo(obj, msg)
+        function errstruct = badgeo(obj, msg, varargin)
             if ~exist('msg','var')
-                msg = obj.badgeo_msg;
+                msg = sprintf(obj.badgeo_msg, varargin{:});
             end
             errstruct = obj.makeErrStruct(obj.badgeo_tag, msg);
             error(errstruct);
