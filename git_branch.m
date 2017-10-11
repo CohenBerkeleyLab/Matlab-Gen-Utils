@@ -11,6 +11,7 @@ catch err
     cd(olddir);
     rethrow(err);
 end
+cd(olddir);
 
 if git_stat ~= 0
     gbranch = 'Unknown';
