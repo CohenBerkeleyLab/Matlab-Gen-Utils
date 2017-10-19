@@ -217,7 +217,7 @@ classdef GitChecker < handle
                 i = inds(a);
                 cd(obj.Dirs(i).directory);
                 try % encase in try-catch to always be sure to return to old directory in case of error
-                    for b=1:numel(obj.Dirs.commit_ranges)
+                    for b=1:numel(obj.Dirs(i).commit_ranges)
                         sys_cmd = sprintf('git merge-base --is-ancestor %s HEAD', obj.Dirs(i).commit_ranges{b}{1});
                         stat1 = ~system(sys_cmd);
                         sys_cmd = sprintf('git merge-base --is-ancestor HEAD %s', obj.Dirs(i).commit_ranges{b}{2});
