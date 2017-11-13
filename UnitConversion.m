@@ -6,6 +6,15 @@ classdef UnitConversion < handle
     %   units with the GET_CONVERSION() method. Metric prefixes (from
     %   "atto" to "exa") are defined internally, so one does not need to
     %   define separate units for different prefixes.
+    %
+    %   Public properties:
+    %       abbrev_case_sensitive (default true) controls whether the
+    %       instance compares unit abbreviations with or without case
+    %       sensitivity (true = with, i.e. ppbV is different from ppbv).
+    
+    properties
+        abbrev_case_sensitive = true;
+    end
     
     properties(SetAccess = protected)
         unit_names = {};
@@ -50,19 +59,19 @@ classdef UnitConversion < handle
             elseif ~ischar(abbreviation)
                 error('unitid:bad_input', 'ABBREVIATION must be a string')
             elseif length(long_name) < length(abbreviation)
-                warning('LONG_NAME should not be shorter than ABBREVIATION')
+                warning('unitid:name_length','LONG_NAME should not be shorter than ABBREVIATION')
             elseif ~isnumeric(conv_factor) || ~isscalar(conv_factor)
                 error('unitid:bad_input', 'CONV_FACTOR must be a scalar number')
             elseif conv_factor <= 0
-                warning('CONV_FACTOR should not be <= 0')
+                warning('unitid:neg_conv_factor','CONV_FACTOR should not be <= 0')
             end
             
             long_name = lower(long_name);
             
             if ismember(long_name, obj.list_long_names())
-                warning('Duplicate long name: "%s"', long_name);
+                warning('unitid:dup_name','Duplicate long name: "%s"', long_name);
             elseif ismember(abbreviation, obj.list_abbreviations())
-                warning('Duplicate abbreviation: "%s"', long_name);
+                warning('unitid:dup_abbrev','Duplicate abbreviation: "%s"', long_name);
             end
             
             obj.unit_names{end+1} = struct('name', long_name, 'abbr', abbreviation, 'conv', conv_factor);
@@ -150,15 +159,21 @@ classdef UnitConversion < handle
             unit_convs = obj.list_conversions();
             [shortex, longex] = obj.prefix_regex();
             
+            if obj.abbrev_case_sensitive
+                regex_fxn = @(u, r) regexp(u, r, 'match', 'once');
+            else
+                regex_fxn = @(u, r) regexpi(u, r, 'match', 'once');
+            end
+            
             unit_conv = 0;
             for a=1:numel(names)
                 ex = sprintf('^(%s)?%s$', shortex, abbr{a});
-                if ~isempty(regexp(unit, ex, 'once'));
+                if ~isempty(regex_fxn(unit, ex));
                     if unit_conv ~= 0
                         error('unit_conv:multiple_matches', 'Multiple matches found for unit %s', unit)
                     end
                     p_ex = sprintf('^(%s)(?=%s$)', shortex, abbr{a});
-                    prefix = regexp(unit, p_ex, 'match', 'once');
+                    prefix = regex_fxn(unit, p_ex);
                     if ~isempty(prefix)
                         conv = obj.short_prefixes.(prefix);
                     else

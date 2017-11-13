@@ -1,4 +1,4 @@
-function [ varargout ] = convert_units( data, unit_in, unit_out )
+function [ varargout ] = convert_units( data, unit_in, unit_out, varargin )
 %CONVERT_UNITS Convert data between defined units
 %   Takes in a matrix or vector of data and two strings defining the unit
 %   the data is in and the unit you want the data to be in.  Will convert
@@ -6,9 +6,22 @@ function [ varargout ] = convert_units( data, unit_in, unit_out )
 %   You can also pass 'ls', 'list', or 'listunits' as the only input to see
 %   what units it knows and their categories.
 %
+%   Parameters:
+%
+%       'case' - logical, default is true, controls whether unit
+%       abbreviations are matched with case sensitive comparison or not.
+%
 %   Josh Laughner <joshlaugh5@gmail.com> 17 June 2015
 
 E = JLLErrors;
+
+p = inputParser;
+p.addParameter('case', true);
+
+p.parse(varargin{:});
+pout = p.Results;
+
+abbrev_case = pout.case;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% UNIT DEFINITION %%%%%
@@ -16,11 +29,13 @@ E = JLLErrors;
 
 % Add units to a category (or make a new category here). The code will
 % require that both the in and out unit be in the same category.
+wstate = warning('off','unitid:dup_abbrev');
 MixingRatios = UnitConversion;
+MixingRatios.abbrev_case_sensitive = abbrev_case;
 MixingRatios.add_unit('parts-per-trillion', 'ppt', 1e-12);
 MixingRatios.add_unit('parts-per-trillion-volume', 'pptv', 1e-12);
 MixingRatios.add_unit('parts-per-billion', 'ppb', 1e-9);
-MixingRatios.add_unit('parts-per-billion-volume', 'ppb', 1e-9);
+MixingRatios.add_unit('parts-per-billion-volume', 'ppbv', 1e-9);
 MixingRatios.add_unit('parts-per-million', 'ppm', 1e-6);
 MixingRatios.add_unit('parts-per-million-volume', 'ppmv', 1e-6);
 MixingRatios.add_unit('parts-per-part', 'ppp', 1);
@@ -28,6 +43,7 @@ MixingRatios.add_unit('parts-per-part-volume', 'pppv', 1);
 UnitCategories.mixing_ratios = MixingRatios;
 
 Pressures = UnitConversion;
+Pressures.abbrev_case_sensitive = abbrev_case;
 Pressures.add_unit('pascal', 'Pa', 1);
 Pressures.add_unit('bar', 'b', 1e5);
 Pressures.add_unit('atmosphere', 'atm', 101325);
@@ -35,10 +51,11 @@ Pressures.add_unit('Torr', 'torr', 101325/760);
 UnitCategories.pressure = Pressures;
 
 Lengths = UnitConversion;
+Lengths.abbrev_case_sensitive = abbrev_case;
 Lengths.add_unit('meter', 'm', 1);
 Lengths.add_unit('metre', 'm', 1);
 UnitCategories.lengths = Lengths;
-
+warning(wstate);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% INPUT CHECKING %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
