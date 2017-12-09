@@ -1,6 +1,9 @@
-function [ data ] = scale_to_range( data, varargin )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+function [ vals ] = scale_to_range( vals, varargin )
+%SCALE_TO_RANGE Linearly scales numeric data to a given range of values
+%   VALS = SCALE_TO_RANGE( VALS, [MINVAL, MAXVAL] )
+%   VALS = SCALE_TO_RANGE( VALS, MINVAL, MAXVAL ) In either form, VALS is
+%   remapped to the range [MINVAL, MAXVAL] so that the old minimum value of
+%   VALS is mapped to MINVAL and likewise for the old maximum value.
 
 if nargin == 2
     if ~isnumeric(varargin{1}) || numel(varargin{1}) ~= 2
@@ -19,9 +22,9 @@ elseif nargin == 3
     end
 end
 
-data = data - min(data(:));
-data = data .* (maxval-minval)/max(data(:));
-data = data + minval;
+vals = vals - min(vals(:));
+vals = vals .* (maxval-minval)/max(vals(:));
+vals = vals + minval;
 
 end
 

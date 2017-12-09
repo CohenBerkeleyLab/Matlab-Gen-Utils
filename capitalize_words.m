@@ -1,6 +1,8 @@
 function [ str ] = capitalize_words( str )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%CAPITALIZE_WORDS Capitalize each word in a string
+%   STR = CAPITALIZE_WORDS( STR ) Capitalzed each word in STR, i.e. any
+%   letter preceeded by at least one whitespace is capitalized. The first
+%   character in the string is also capitalized.
 
 % Adapted from https://www.mathworks.com/matlabcentral/answers/107307-function-to-capitalize-first-letter-in-each-word-in-string-but-forces-all-other-letters-to-be-lowerc
 

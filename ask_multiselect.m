@@ -28,24 +28,28 @@ end
 p = inputParser;
 p.addParameter('softquit',false,@(x) (islogical(x) && isscalar(x)));
 p.addParameter('returnindex',false)
+p.addParameter('rangeselect',false)
 p.parse(varargin{:});
 pout = p.Results;
 
-softquit = pout.softquit;
-returnind = pout.returnindex;
+soft_quit = pout.softquit;
+return_ind = pout.returnindex;
+range_select = pout.rangeselect;
 
-if ~isscalar(softquit) || ~islogical(softquit)
+if ~isscalar(soft_quit) || ~islogical(soft_quit)
     E.badinput('The parameter ''softquit'' must be a scalar logical value');
 end
-if ~isscalar(returnind) || ~islogical(returnind) && ~isnumeric(returnind)
+if ~isscalar(return_ind) || ~islogical(return_ind) && ~isnumeric(return_ind)
     E.badinput('The parameter ''returnindex'' must be a scalar logical value');
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% MAIN FUNCTION %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 fprintf('%s:\n',prompt);
+fprintf('(You may select a range with colon notation, e.g. 1:5)\n')
 for a=1:numel(options)
     fprintf('\t%d - %s\n',a,options{a});
 end
@@ -53,7 +57,7 @@ end
 testfxn = @(x) all(x >= 1 & x <= numel(options));
 testmsg = sprintf('Only values 1-%d permitted', numel(options));
 try
-    sel_inds = ask_number(sprintf('Select options (1-%d)', numel(options)), 'softquit', softquit, 'testfxn', testfxn, 'testmsg', testmsg);
+    sel_inds = ask_number(sprintf('Select options (1-%d)', numel(options)), 'softquit', soft_quit, 'testfxn', testfxn, 'testmsg', testmsg);
 catch err
     if strcmp(err.identifier,'ask_number:user_cancel')
         E.userCancel();
@@ -67,7 +71,7 @@ sel_inds = sort(unique(sel_inds));
 if isnan(sel_inds)
     user_ans = 0;
     return
-elseif returnind
+elseif return_ind
     user_ans = sel_inds;
 else
     user_ans = options(sel_inds);

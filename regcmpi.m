@@ -4,7 +4,20 @@ function [ b ] = regcmpi( str, expression, varargin )
 %   insensitive regular expression EXPRESSION and return B = true if a
 %   match is found.
 
-b = isempty(regexpi(str, expression, varargin{:}, 'once'));
+E = JLLErrors;
+
+if ~ischar(expression)
+    E.badinput('EXPRESSION must be a string')
+end
+
+if ischar(str)
+    b = ~isempty(regexpi(str, expression, varargin{:}, 'once'));
+elseif iscellstr(str)
+    tmp = regexpi(str, expression, varargin{:}, 'once');
+    b = ~cellfun(@isempty, tmp);
+else
+    E.badinput('STR must be a string or cell array of strings');
+end
 
 end
 
