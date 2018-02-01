@@ -230,11 +230,23 @@ classdef JLLErrors<handle
         
         function errstruct = sizeMismatch(obj, varargin)
             % Error for when an arbitrary number of variables do not have
-            % the same size.  Takes at least two arguments (variable names
-            % as strings) up to any number.
-            if numel(varargin)<2; error('JLLErrors:sizeMismatch:too_few_inputs','JLLErrors.sizeMismatch needs at least 2 variable names'); end
-            varnames = strjoin(varargin, ', ');
-            msg = sprintf(obj.sizeMismatch_msg, varnames);
+            % the same size.  Can operate in two forms:
+            %
+            %   1) If given either one string, or multiple strings where
+            %   the first one contains a %, then it behaves like sprintf(),
+            %   using the first argument as the format string and the rest
+            %   as values to be formatted into it.
+            %
+            %   2) If given two or more strings and the first one does NOT
+            %   contain a %, then they are considered variable names and
+            %   placed into the default message.
+            
+            if numel(varargin) == 1 || ismember('%', varargin{1})
+                msg = sprintf(varargin{1}, varargin{2:end});
+            else            
+                varnames = strjoin(varargin, ', ');
+                msg = sprintf(obj.sizeMismatch_msg, varnames);
+            end
             errstruct = obj.makeErrStruct(obj.sizeMismatch_tag, msg);
             error(errstruct);
         end

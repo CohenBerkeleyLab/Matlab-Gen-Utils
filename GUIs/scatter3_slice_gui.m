@@ -1,4 +1,27 @@
 function varargout = scatter3_slice_gui(varargin)
+% SCATTER3_SLICE_GUI create a GUI to display slices of 3D scattered data
+%
+%   SCATTER3_SLICE_GUI( X, Y, Z ) create the 3D scatter plot with only X,
+%   Y, and Z data (no size or color).
+%
+%   SCATTER3_SLICE_GUI( X, Y, Z, S ) create the 3D scatter plot with size
+%   determined by S.
+%
+%   SCATTER3_SLICE_GUI( X, Y, Z, S, C ) create the 3D scatter plot with
+%   size determined by S and color by C. A colorbar is automatically added.
+%   To provide color data but not size data, pass [] as S.
+%
+%   SCATTER3_SLICE_GUI( ___, 'scatter2' ) will use a 2D scatter plot
+%   instead. Here, Z will only be used in figuring out what subset of the
+%   data to plot for each slice. Essentially, this is like a top-down view
+%   of the normal 3D scatter plot.
+%
+%   Parameters:
+%       'xlabel', 'ylabel', 'zlabel', 'clabel', 'title' - each expects a
+%       string, and each sets the X, Y, Z, or colorbar label of the scatter
+%       plot or sets its title.
+
+
 % SCATTER3_SLICE_GUI MATLAB code for scatter3_slice_gui.fig
 %      SCATTER3_SLICE_GUI, by itself, creates a new SCATTER3_SLICE_GUI or raises the existing
 %      singleton*.
@@ -115,6 +138,10 @@ handles.internal.clabel = pout.clabel;
 
 % The title only needs set one
 handles.text_title.String = pout.title;
+
+% Use this to set the x and y limits to always stay fixed
+handles.internal.xlim = calc_plot_limits(handles.input.x_vals,1,'pow10');
+handles.internal.ylim = calc_plot_limits(handles.input.y_vals,1,'pow10');
 
 % For now, we'll just default to choosing an initial z-bin size that will
 % give 10 bins. Later I might add options that will let us choose the
@@ -418,6 +445,9 @@ elseif strcmpi(handles.internal.plot_type, 'scatter3')
 else
     E.notimplemented('No plotting implemented for handles.internal.plot_type == "%s"', handles.internal.plot_type)
 end
+
+xlim(handles.axes_scatter, handles.internal.xlim);
+ylim(handles.axes_scatter, handles.internal.ylim);
 
 if handles.internal.fix_z
     zlim(handles.axes_scatter, handles.internal.zlim);
