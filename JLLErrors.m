@@ -392,14 +392,14 @@ classdef JLLErrors<handle
             %
             % If you pass more than one input, it will insert the second
             % and onward into the first using sprintf.
-            if numel(varargin) > 0
+            if numel(varargin) == 0
                 if ~ischar(date_in) && ~isnumeric(date_in)
                     errstruct = obj.makeErrStruct(obj.datefmt_tag, 'Dates must be numerical datenums or strings');
                 else
                     if isnumeric(date_in)
                         date_in = num2str(date_in);
                     end
-                    msg = sprintf(obj.datefmt_tag, date_in);
+                    msg = sprintf(obj.datefmt_msg, date_in);
                     errstruct = obj.makeErrStruct(obj.datefmt_tag, msg);
                 end
             else
