@@ -28,6 +28,10 @@ function [ dest ] = copy_structure_fields(source, dest, varargin)
 %   exist. Instead, the original value (if DEST is given as a structure in
 %   the input) or the default value of an empty array (if just
 %   FIELDS_TO_COPY is given) is retained for that field.
+%
+%   DEST_OUT = COPY_STRUCTURE_FIELDS( ___, 'missing' ) will copy fields
+%   from SOURCE that are missing from DEST. This ignores FIELDS_TO_COPY in
+%   the three argument form and errors if used with the two argument form.
 
 %%%%%%%%%%%%%%%%%
 % INPUT PARSING %
@@ -39,28 +43,42 @@ p = advInputParser;
 p.addOptional('fields_to_copy', {}, @iscellstr);
 p.addFlag('substructs');
 p.addFlag('ignore_error');
+p.addFlag('missing');
 
 p.parse(varargin{:});
 pout = p.AdvResults;
 
 ignore_error = pout.ignore_error;
+missing_flag = pout.missing;
 
-if ~isstruct(source) || ~isscalar(source)
-    E.badinput('SOURCE must be a scalar structure');
+if ~isstruct(source)
+    E.badinput('SOURCE must be a structure');
 end
 
-if iscellstr(dest)
+if iscellstr(dest) || ischar(dest)
+    if missing_flag
+        E.badinput('With the "missing" flag, DEST must be a struct');
+    elseif ischar(dest)
+        dest = {dest};
+    end
     fields_to_copy = dest;
     dest = make_empty_struct_from_cell(dest, fields_to_copy);
+    dest = repmat(dest, size(source));
 elseif isstruct(dest)
-    if ~isscalar(dest)
-        E.badinput('DEST must be a scalar, if given as a structure');
+    if ~isequal(size(dest), size(source))
+        E.badinput('DEST must the same size as SOURCE, if given as a structure');
     end
     
-    fields_to_copy = pout.fields_to_copy;
+    if ~missing_flag
+        fields_to_copy = pout.fields_to_copy;
+    else
+        fields_to_copy = missing_fields(source, dest);
+    end
     if isempty(fields_to_copy)
         fields_to_copy = fieldnames(dest);
     end
+else
+    E.badinput('DEST must be a string, cell array of strings, or structure');
 end
 
 if pout.substructs
@@ -75,23 +93,33 @@ end
 % MAIN FUNCTION %
 %%%%%%%%%%%%%%%%%
 
-for i = 1:numel(fields_to_copy)
-    try
-        dest.(fields_to_copy{i}) = finder_fxn(source, fields_to_copy{i});
-    catch err
-        if strcmp(err.identifier, 'MATLAB:nonExistentField')
-            % Reformat the message to better reflect the true cause of the
-            % error
-            if ~ignore_error
-                error('MATLAB:nonExistentField', 'Could not find field "%s" in SOURCE%s', fields_to_copy{i}, err_addendum);
+for i_ind = 1:numel(dest)
+    for i_field = 1:numel(fields_to_copy)
+        try
+            dest(i_ind).(fields_to_copy{i_field}) = finder_fxn(source(i_ind), fields_to_copy{i_field});
+        catch err
+            if strcmp(err.identifier, 'MATLAB:nonExistentField')
+                % Reformat the message to better reflect the true cause of the
+                % error
+                if ~ignore_error
+                    error('MATLAB:nonExistentField', 'Could not find field "%s" in SOURCE%s', fields_to_copy{i_field}, err_addendum);
+                end
+            else
+                rethrow(err)
             end
-        else
-            rethrow(err)
         end
     end
 end
 
 
+end
+
+function fns = missing_fields(source, dest)
+% Returns a cell array of fields in SOURCE but not DEST
+fns_source = fieldnames(source);
+fns_dest = fieldnames(dest);
+xx = ~ismember(fns_source, fns_dest);
+fns = fns_source(xx);
 end
 
 function val = find_field(S, field_name)

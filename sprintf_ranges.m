@@ -34,7 +34,7 @@ function [ str ] = sprintf_ranges(values, varargin)
 %       'range_sep': the character(s) placed between the two ends of a
 %       range. Default is '-'.
 %
-%       'group_sep': the character(s) placed between separate groups
+%       'value_sep': the character(s) placed between separate groups
 %       (ranges or orphans). Default is '_'.
 %
 %       'rel_tol': the relative tolerance for determining whether a
@@ -82,6 +82,13 @@ end
 tolerance = pout.rel_tol * increment;
 
 % Main Function %
+
+% Corner case: only one value passed. diff(values(:)) will then be an empty
+% array.
+if numel(values) == 1
+    str = num2str(values);
+    return
+end
 
 value_diffs = diff(values(:));
 if all(mod(values,1) == 0)
