@@ -46,10 +46,46 @@ function [ varargout ] = make_latex_table( T, varargin )
 %       \caption{} command will not be inserted at all.
 %
 %       'rownames' - cell array of strings that will be used as the row
-%       names; overrides those given in T if it is a table.
+%       names; overrides those given in T if it is a table. rownames must
+%       by R-by-N, where R is the number of rows in the table and N is >=
+%       1. By default, vertically adjacent identical strings are combined
+%       into \multirow commands (see next parameter).
+%
+%       'multirow' - boolean, if true (default), then identical adjacent
+%       row names along the first dimension will be combined into a
+%       \multirow command. E.g. if 'rownames' was:
+%
+%           {   'alpha', 'ex'    ;
+%               'alpha', 'ex'    ;
+%               'alpha', 'why'   ;
+%               'beta',  'zee'   ;
+%               'alpha', 'zee'   }
+%
+%       then the first three "alpha"s and the two "ex"s and "zee"s would be
+%       combined into \multirow{3}{*}{alpha}, \multirow{2}{*}{ex} and
+%       \multirow{2}{*}{zee} respectively. However, the last "alpha" would
+%       stay separate. If you give 'false' to this parameter, then no
+%       entries will be combined into \multirow.
 %
 %       'colnames' - cell array of strings that will be used as the column
 %       names; overrides the VariableNames given in T if it is a table.
+%       colnames must be N-by-C where N is >= 1 and C is either the number
+%       of columns in the table or the number of columns in the table plus
+%       the number of columns in rownames. By default, horizontally
+%       adjacent identical strings are combined into \multicolumn commands
+%       (see next parameter).
+%
+%       'multicol' - boolean, if true (default), combines adjacent
+%       identical column names into \multicolumn commands. This checks
+%       along the second dimension of colnames, so e.g.:
+%
+%           { 'alpha', 'alpha', 'alpha' ;
+%             'ex',    'why',   'zee'   }
+%
+%       would combine the three "alpha" into a \multicolumn{3}{c}{alpha}
+%       command. Currently, there is no way to change the "c" format.
+%       Setting this parameter to false means that nothing would be
+%       combined.
 %
 %       'm2l' - a cell array of options that mat2latex understands. These
 %       will be passed to mat2latex if mat2latex is called to convert T to
@@ -58,6 +94,13 @@ function [ varargout ] = make_latex_table( T, varargin )
 %       'lines' - a 1-by-3 cell array of strings that have Latex commands
 %       for the top, middle, and bottom horizontal lines. Defaults to
 %       '\hline' for all three.
+%
+%       'extra_hlines' - pass either a vector of numeric or logical indices
+%       to add extra horizontal lines in the table. They will be added
+%       after the rows given by the numeric indices or after rows for which
+%       the logical index is true. If given as a logical index, it is
+%       checked that it is the same length as the number of rows in the
+%       table. lines{2} is used for the horizontal line command.
 
 E = JLLErrors;
 
@@ -66,11 +109,14 @@ p.addParameter('file', '', @ischar);
 p.addParameter('caption', '');
 p.addParameter('label','');
 p.addParameter('rownames', {});
+p.addParameter('multirow', true);
 p.addParameter('colnames', {});
+p.addParameter('multicol', true);
 p.addParameter('m2l', {});
 p.addParameter('insert',false);
 p.addParameter('marker','');
 p.addParameter('overwrite',false);
+p.addParameter('extra_hlines',[]);
 p.addParameter('lines', {'\hline', '\hline', '\hline'});
 
 p.parse(varargin{:});
@@ -80,11 +126,14 @@ file_out = pout.file;
 caption = pout.caption;
 label = pout.label;
 rownames = pout.rownames;
+use_multirow = pout.multirow;
 colnames = pout.colnames;
+use_multicol = pout.multicol;
 m2l_opts = pout.m2l;
 do_insert = pout.insert;
 insert_mark = pout.marker;
 overwrite = pout.overwrite;
+extra_hlines = pout.extra_hlines;
 hlines = pout.lines;
 
 if istable(T) && isempty(rownames)
@@ -151,6 +200,13 @@ end
 
 
 %%%%% MAIN FUNCTION %%%%%
+is_rownames = ~isempty(rownames) > 0;
+if isrow(rownames)
+    % Allow the user to give a single column of rownames as either a row or
+    % column vector
+    rownames = rownames';
+end
+
 if ischar(T)
     latex_table_body = T;
 elseif isnumeric(T) || istable(T)
@@ -160,42 +216,63 @@ elseif isnumeric(T) || istable(T)
     latex_table_body = mat2latex(T, m2l_opts{:});
 end
 
+n_table_rows = numel(strfind(latex_table_body, '\\'));
+if is_rownames && size(rownames,1) ~= n_table_rows
+    % It's possible that a string passed in as T might not have a \\ at the
+    % end of the last line. This is a kludgy solution, but I don't use the
+    % character input very ofter
+    if size(rownames,1) == n_table_rows + 1
+        warning('rownames may have one too many rows unless you passed T as a character array and did not include a \\ after the last row')
+    else
+        E.badinput('If giving row names, the cell array must have the same number of rows as the table (if giving only a single column of row names, it may be a row vector with the same number of columns as the table has rows)')
+    end
+end
+
+% Check the extra hlines. If it's not logical, convert to a logical array
+if isempty(extra_hlines)
+    extra_hlines = false(n_table_rows + 1,1); % The extra +1 accounts for if T is passed as a character array and is missing it's final \\. Having extra will not hurt.
+elseif ~islogical(extra_hlines)
+    tmp = false(n_table_rows + 1, 1);
+    tmp(extra_hlines) = true;
+    extra_hlines = tmp;
+end
+
+if numel(extra_hlines) ~= n_table_rows && numel(extra_hlines) ~= (n_table_rows + 1)
+    E.badinput('If giving extra hlines as a logical array, it must have the same number of elements as there are rows in the table')
+end
+
 latex_table_body = strsplit(latex_table_body, '\n');
 latex_table_body = latex_table_body(~iscellcontents(latex_table_body,'isempty'));
 
 % If no row names, we don't need to reserve a column for them in the
 % header, nor print them (obviously)
-is_rownames = ~isempty(rownames);
-n_columns = numel(strfind(latex_table_body{1},'&')) + 1 + is_rownames;
+[rownames, n_columns_rownames] = format_row_names(rownames, use_multirow);
+
+n_columns = numel(strfind(latex_table_body{1},'&')) + 1 + n_columns_rownames;
 
 % Allow the column names to include one for the row names or not.
 if ~isempty(colnames)
-    if ~is_rownames
-        % If no row names, the number of column names must be the number of
-        % columns
-        if numel(colnames) ~= n_columns
-            E.badinput('Wrong number of column names: The parameter ''colnames'' must include an entry for each data column, if given')
-        end
-        
-        header = [strjoin(colnames, ' & '), ' \\'];
+    if size(colnames,2) == n_columns 
+        extra_ands = '';
+    elseif size(colnames,2) == n_columns - n_columns_rownames
+        extra_ands = repmat('& ', 1, n_columns_rownames);
     else
-        % If row names, there need not be a column name for that one
-        if numel(colnames) == n_columns - 1
-            header = ['& ', strjoin(colnames, ' & '), ' \\'];
-        elseif numel(colnames) == n_columns
-            header = [strjoin(colnames, ' & '), ' \\ ', hlines{2}];
-        else
-            E.badinput('Wrong number of column names: The parameter ''colnames'' must include an entry for each data column, and may include one for the column of row names, if given');
-        end
+        E.badinput('Wrong number of column names: if given, the parameter ''colnames'' must include an entry for each data column OR an entry for every data column and row name column')
     end
+    
+    header = format_header(colnames, use_multicol, extra_ands);
+    % Add the middle dividing line before the last newline
+    header = regexprep(header, '\\n $', strrep([hlines{2},'\n'],'\','\\'));
     tabular_body = sprintf('%s %s\n ', hlines{1}, header);
 else
-    tabular_body = '';
+    tabular_body = [hlines{1}, ' '];
 end
 
 for a=1:numel(latex_table_body)
     if a == numel(latex_table_body)
         sep = sprintf('%s \\n ', hlines{3});
+    elseif extra_hlines(a)
+        sep = sprintf('%s \\n ', hlines{2});
     else
         sep = '\n ';
     end
@@ -326,4 +403,105 @@ end
 
 movefile(out_name, file_name);
 
+end
+
+function header = format_header(colnames_in, use_multicol, extra_ands)
+% Take the column names cell array and format it for inclusion in the latex
+% table. This means joining columns with the \& separator and lines with
+% the \\ separator. If USE_MULTICOL is true, then adjacent cells containing
+% the same string will be merged into a single multicol function. Currently
+% it will always center the header within each column and does not include
+% lines to either side.
+header = '';
+if use_multicol
+    multicol = 'col';
+else
+    multicol = 'no';
+end
+
+for i_row = 1:size(colnames_in,1)
+    header = [header, extra_ands, format_header_row(colnames_in(i_row,:), multicol, true), ' \\ \n '];
+end
+end
+
+function [row_names, n_columns] = format_row_names(row_names_in, use_multirow)
+% If row_names_in is empty, there's nothing to do (and no columns to
+% reserve)
+if isempty(row_names_in)
+    row_names = row_names_in;
+    n_columns = 0;
+    return
+end
+
+if use_multirow
+    multirow = 'row';
+else
+    multirow = 'no';
+end
+
+% Transpose the row names so that we can reuse the code in
+% format_header_row, which is written for the header and combines identical
+% entries adjacent along rows.
+row_names_in = row_names_in';
+for i_row = 1:size(row_names_in,1)
+    row_names_in(i_row,:) = format_header_row(row_names_in(i_row,:), multirow, false);
+end
+
+% Now we transpose back and join each true row of the row names into a
+% single string connected by &'s
+row_names_in = row_names_in';
+row_names = cell(size(row_names_in,1),1);
+for i_row = 1:numel(row_names)
+    row_names{i_row} = strjoin(row_names_in(i_row,:), ' & ');
+end
+
+n_columns = size(row_names_in,2);
+
+end
+
+function row = format_header_row(row, use_multi, do_join)
+E = JLLErrors;
+
+if ~iscellstr(row)
+    E.badinput('ROW must be a cell array of char arrays');
+end
+
+allowed_use_multi = {'no','col','row'};
+if ~ismember(use_multi, allowed_use_multi)
+    E.badinput('USE_MULTI must be one of: %s', strjoin(allowed_use_multi, ', '));
+end
+
+i_col = 1;
+keep_columns = true(size(row));
+while ~strcmpi(use_multi,'no') && i_col <= numel(row)
+    i_col_same = 1;
+    
+    while i_col + i_col_same <= numel(row) && strcmp(row{i_col}, row{i_col + i_col_same})
+        % Mark the same columns for removal in multicolumn mode. For
+        % multirow, each row needs the same number of &'s, so don't remove
+        % them, but do replace them repeated entries with empty strings.
+        if strcmpi(use_multi, 'col')
+            keep_columns(i_col + i_col_same) = false;
+        elseif strcmpi(use_multi, 'row')
+            row{i_col + i_col_same} = '';
+        end
+        i_col_same = i_col_same + 1;
+    end
+    
+    % Only replace the current string with a multicolumn if there are
+    % actually adjacent identical headers
+    if i_col_same > 1
+        if strcmpi(use_multi, 'col')
+            row{i_col} = sprintf('\\multicolumn{%d}{c}{%s}', i_col_same, row{i_col});
+        elseif strcmpi(use_multi, 'row')
+            row{i_col} = sprintf('\\multirow{%d}{*}{%s}', i_col_same, row{i_col});
+        end
+    end
+    
+    i_col = i_col + i_col_same;
+end
+
+if do_join
+    row = strjoin(row(keep_columns), ' & ');
+end
 end
