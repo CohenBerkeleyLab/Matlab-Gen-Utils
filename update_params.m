@@ -30,17 +30,21 @@ for i_param = 1:2:numel(varargin)
         E.badinput('The first, third, fifth, etc. inputs after the parameters cell must be char arrays or strings (these are the parameter names)')
     end
     
+    do_append = false;
     param_idx = find(strcmp(parameters, this_param));
     if isempty(param_idx)
-        E.callError('unknown_parameter', 'The parameter named "%s" does not exist in the parameters cell array', this_param);
+        %E.callError('unknown_parameter', 'The parameter named "%s" does not exist in the parameters cell array', this_param);
+        do_append = true;
     elseif isscalar(param_idx) && mod(param_idx, 2) ~= 1
-        E.callError('parameter_name_matched_value', 'The parameter name "%s" only appears as a parameter value', this_param);
+        %E.callError('parameter_name_matched_value', 'The parameter name "%s" only appears as a parameter value', this_param);
+        do_append = true;
     elseif ~isscalar(param_idx)
         % Try removing the even parameter indices; it's possible that the
         % parameter name is supposed to show up as a value
         param_idx(mod(param_idx,2) ~= 1) = [];
         if isempty(param_idx)
-            E.callError('parameter_name_matched_value', 'The parameter name "%s" only appears as a parameter value', this_param);
+            %E.callError('parameter_name_matched_value', 'The parameter name "%s" only appears as a parameter value', this_param);
+            do_append = true;
         elseif ~isscalar(param_idx)
             E.callError('multiple_matched_parameters', 'The parameter name "%s" exists multiple times in the parameters cell array', this_param);
         end
@@ -48,7 +52,11 @@ for i_param = 1:2:numel(varargin)
     
     % All that error checking, now all we need to do is change the
     % parameter value that follows the name.
-    parameters{param_idx+1} = varargin{i_param+1};
+    if do_append
+        parameters(end+1:end+2) = varargin(i_param:i_param+1);
+    else
+        parameters{param_idx+1} = varargin{i_param+1};
+    end
 end
 
 end

@@ -161,9 +161,10 @@ classdef JLLErrors<handle
             % loaded. If multiple arguments given, they are inserted in the
             % first one using sprintf.
             if numel(varargin) > 0
-                filename = sprintf(filename, varargin{:});
+                msg = sprintf(filename, varargin{:});
+            else
+                msg = sprintf(obj.fnf_msg,filename);
             end
-            msg = sprintf(obj.fnf_msg,filename);
             errstruct = obj.makeErrStruct(obj.fnf_tag, msg);
             error(errstruct);
         end

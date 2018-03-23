@@ -29,9 +29,9 @@ if ~force_column
                 first_is_row = isrow(varargin{a});
             end
         end
-        if isrow(varargin{a}) ~= first_is_row && ~isscalar(varargin{a})
+        if isrow(varargin{a}) ~= first_is_row && ~isscalar(varargin{a}) && ~isempty(varargin{a})
             E.badinput('All inputs to VECCAT must be the same sort of vector (row or column). This function does not handle mixed vector types')
-        elseif ~isvector(varargin{a})
+        elseif ~isvector(varargin{a}) && ~isempty(varargin{a})
             E.badinput('VECCAT only concatenates vectors')
         end
     end
