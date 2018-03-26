@@ -117,7 +117,15 @@ if draw_lines
             break
         end
     end
+    
+    % Set the x and y limit modes to manual, we'll reset them at the end
+    % Not behaving 14 Mar 2018
+    old_xlim_mode = get(gca, 'xlimmode');
+    old_ylim_mode = get(gca, 'ylimmode');
+    set(gca,'xlimmode','manual','ylimmode','manual');
 end
+
+
 
 if strcmpi(states,'all');
     for a=1:numel(usa)
@@ -177,6 +185,8 @@ end
 if ~draw_lines
     varargout{1} = lon_out;
     varargout{2} = lat_out;
+else
+    set(gca,'xlimmode',old_xlim_mode,'ylimmode',old_ylim_mode);
 end
 end
 

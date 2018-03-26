@@ -59,6 +59,7 @@ if ~ischar(testmsg)
     E.badinput('testmsg must be a string')
 end
 
+
 if use_default
     fprintf('%s (%g is default): ', prompt, default);
 else
@@ -78,7 +79,7 @@ while true
             E.userCancel()
         end
     else
-        user_ans = str2double(strsplit(strtrim(user_ans)));
+        user_ans = parse_list(strtrim(user_ans));
         try
             if any(isnan(user_ans))
                 fprintf('\tNumber not recognized by str2double (q to quit): ');
@@ -107,3 +108,16 @@ end
 
 end
 
+function list_out = parse_list(string_in)
+args = strsplit(string_in, ':');
+
+if numel(args) == 1
+    list_out = str2double(strsplit(args{1}));
+elseif numel(args) <= 3
+    args = num2cell(str2double(args));
+    list_out = colon(args{:});
+else
+    error('parse_input:bad_input', 'Cannot have more than 2 colons')
+end
+
+end

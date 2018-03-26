@@ -179,6 +179,9 @@ classdef GlobeGrid < handle
                 case 'us'
                     obj.DomainLon = [-125 -65];
                     obj.DomainLat = [25 50];
+                case 'hk'
+                    obj.DomainLon = [108 118];
+                    obj.DomainLat = [19 26];
                 otherwise
                     error('globegrid:bad_input','Domain name %s not recognized', domain)
             end

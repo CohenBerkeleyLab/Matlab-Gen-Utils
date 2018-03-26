@@ -1,7 +1,8 @@
 function [ user_ans ] = ask_date( prompt, varargin )
-%ASK_MULTICHOICE Will ask the user to select from the allowed options
-%   Asks the user the question given in PROMPT to choose from the cell
-%   array ALLOWED_OPTIONS. Two parameters exist:
+%ASK_DATE Will ask the user to provide a date.
+%   Asks the user the question given in PROMPT to provide a date input. If
+%   the input date string isn't parsable by Matlab, the user will be
+%   prompted to reenter it. Two parameters exist:
 %
 %   'default' - choose a default value for the response.
 %
@@ -9,9 +10,8 @@ function [ user_ans ] = ask_date( prompt, varargin )
 %   'q' at any point by throwing an error. If true, this will cause the
 %   function to return a 0 (the number not the string).
 %
-%   This function always returns a string (unless softquit is true) so
-%   you'll need to parse the string back into a number if you want it so.
-%   Answers are also always returned in lower case.
+%   This function always returns the string given by the user (unless
+%   softquit is true).
 %
 %   Josh Laughner <joshlaugh5@gmail.com> 26 Jan 2016
 

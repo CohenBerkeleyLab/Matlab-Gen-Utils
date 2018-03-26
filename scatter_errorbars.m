@@ -95,9 +95,9 @@ indpts(8,:) = tip_r(:);
 indpts(9,:) = NaN;
 
 if strcmpi(direction,'x');
-    l=line(errpts, indpts, 'color', color, 'linewidth', width, 'parent', parent);
+    l=line(errpts(:), indpts(:), 'color', color, 'linewidth', width, 'parent', parent);
 elseif strcmpi(direction, 'y');
-    l=line(indpts, errpts, 'color', color, 'linewidth', width, 'parent', parent);
+    l=line(indpts(:), errpts(:), 'color', color, 'linewidth', width, 'parent', parent);
 end
 
 if nargout > 0
