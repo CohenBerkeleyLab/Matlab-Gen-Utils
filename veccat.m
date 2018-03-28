@@ -36,13 +36,18 @@ if ~force_column
         end
     end
     
+    non_empty_inputs = cellfun(@(x) ~isempty(x), varargin);
+    
     % If all scalars, cat along first dimension
     if first_is_row < 0
         catdim = 1;
     else
         catdim = first_is_row + 1;
     end
-    v = cat(catdim, varargin{:});
+    % Sometimes empty inputs behave as though their dimensions are not
+    % consistent. Since concatenating them does nothing, just skip trying
+    % to concatenate them.
+    v = cat(catdim, varargin{non_empty_inputs});
 else
     varargin = cellfun(@(x) reshape(x, [], 1), varargin, 'UniformOutput', false);
     v = cat(1, varargin{:});
