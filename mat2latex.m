@@ -34,7 +34,10 @@ function varargout = mat2latex(M, format_spec, uncertainty_dim, asymmetry)
 %   MAT2LATEX( M, ___, UNCERTAINTY_DIM, 'asym' ) will allow there to be
 %   asymmetric uncertainty along the specified dimension. The matrix, M,
 %   must rotate [value, lower uncertainty, upper uncertainty] along the
-%   UNCERTAINTY_DIM. You may omit a format string to use the default.
+%   UNCERTAINTY_DIM. You may omit a format string to use the default. If
+%   one of the uncertainty values is a NaN, then that value will use
+%   symmetrical uncertainty formatting. If both are NaNs, an error is
+%   thrown.
 
 default_format_spec = '%g';
 if nargin < 2
@@ -103,7 +106,7 @@ sout = '';
 print_to_screen = nargout == 0;
 
 sz = size(M);
-uncert_step = asym_bool + 2; % a little trickery to give 2 if using asymmetrical uncertainty, 1 otherwise
+uncert_step = asym_bool + 2; % a little trickery to give 2 if using asymmetrical uncertainty, 1 if using symmetrical uncertainty, and 0 if using no uncertainty
 if uncertainty_dim == 1
     astep = uncert_step;
 else
@@ -177,6 +180,16 @@ end
             u = [M{a,b+1}, M{a,b+2}];
         else
             E.badinput('Cannot format the values by rounding to the first place of the uncertainty if no uncertainty given (uncertainty_dim must be >0).');
+        end
+        
+        % If there is a NaN as one of the uncertainties, then assume we
+        % want a symmetrical uncertainty mixed in with the asymmetrical
+        % ones.
+        u_nans = isnan(u);
+        if sum(u_nans) == 1
+            u = u(~u_nans);
+        elseif sum(u_nans) > 1
+            E.badinput('Both uncertainties cannot be NaNs');
         end
         
         fstr = format_general_uncert(v, u, maxplace);
@@ -279,6 +292,17 @@ end
                 warn_neg_uncert = true;
                 u = abs(u);
             end
+            
+            % If there is a NaN as one of the uncertainties, then assume we
+            % want a symmetrical uncertainty mixed in with the asymmetrical
+            % ones.
+            u_nans = isnan(u);
+            if sum(u_nans) == 1
+                u = u(~u_nans);
+            elseif sum(u_nans) > 1
+                E.badinput('Both uncertainties cannot be NaNs');
+            end
+            
             fstr = insert_uncertainty(u, fstr);
         end
     end
