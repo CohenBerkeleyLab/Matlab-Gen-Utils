@@ -36,6 +36,9 @@ function [ LineData ] = plot_fit_line( x, varargin )
 %       one2one - a boolean indicating whether to plot a 1:1 line. Defaults
 %       to true.
 %
+%       pvalue - a boolean indicating whether to plot the p value in the
+%       legend box.
+%
 %       sigma_m - a number indicating how many standard deviations of the
 %       slope to plot as an envelope.  Defaults to 0, i.e. no envelope will
 %       be plotted.
@@ -50,6 +53,7 @@ p = inputParser;
 p.addRequired('x');
 p.addOptional('y',[]);
 p.addParameter('one2one',true);
+p.addParameter('pvalue',false);
 p.addParameter('regression','y-resid',@(x) any(strcmpi(x,{'y-resid','x-resid','majoraxis','RMA'})));
 p.addParameter('sigma_m',0,@isscalar);
 p.addParameter('sigma_b',0,@isscalar);
@@ -60,6 +64,7 @@ x = pout.x;
 y = pout.y;
 one2one = pout.one2one;
 regression = pout.regression;
+pvalue = pout.pvalue;
 mult_sigma_m = pout.sigma_m;
 mult_sigma_b = pout.sigma_b;
 
@@ -83,7 +88,7 @@ if any(isnan(x)) || any(isnan(y))
     x = x(~nans); y = y(~nans);
 end
 
-[xline, yline, lstr, LineData] = calc_fit_line(x, y, 'regression', regression);
+[xline, yline, lstr, LineData] = calc_fit_line(x, y, 'regression', regression,'pvalue',pvalue);
 
 % Plot the line of best fit and format the string for the legend with the
 % slope/intercept info and the R^2 value.

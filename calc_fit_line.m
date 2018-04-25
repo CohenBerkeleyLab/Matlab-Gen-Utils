@@ -57,6 +57,7 @@ default_x_coord = 0:1;
 p = inputParser;
 p.addRequired('x',@isnumeric);
 p.addRequired('y',@isnumeric);
+p.addParameter('pvalue',false);
 p.addParameter('regression','y-resid');
 p.addParameter('xcoord','figxlim');
 
@@ -65,6 +66,7 @@ pout = p.Results;
 x = pout.x;
 y = pout.y;
 regression = lower(pout.regression); % explicitly make the regression string lower case to ease comparison in the switch-case statement
+pvalue = pout.pvalue;
 xcoord = lower(pout.xcoord);
 
 allowed_regressions = {'y-resid','x-resid','majoraxis','RMA','orth-origin'};
@@ -141,7 +143,11 @@ if ~isnan(P(2))
     legend_str = [ legend_str, sprintf(' + %.2g', P(2)) ];
 end
 if ~isnan(R)
-    legend_str = [ legend_str, sprintf(' \nR^2 = %.4f (p = %.2f)',R,p_val) ];
+    if pvalue
+        legend_str = [ legend_str, sprintf(' \nR^2 = %.4f (p = %.2f)',R,p_val) ];
+    else
+        legend_str = [ legend_str, sprintf(' \nR^2 = %.4f',R) ];
+    end
 end
 
 end
