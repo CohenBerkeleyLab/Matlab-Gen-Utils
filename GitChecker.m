@@ -144,7 +144,7 @@ classdef GitChecker < handle
                         if stats(a)
                             % If on any of the allowed branches, this check
                             % passes. No need to do the other checks.
-                            continue
+                            break
                         end
                     end
                 catch err
