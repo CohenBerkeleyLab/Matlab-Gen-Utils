@@ -127,11 +127,11 @@ if draw_lines
         end
     end
     
-    % Set the x and y limit modes to manual, we'll reset them at the end
-    % Not behaving 14 Mar 2018
-    old_xlim_mode = get(gca, 'xlimmode');
-    old_ylim_mode = get(gca, 'ylimmode');
-    set(gca,'xlimmode','manual','ylimmode','manual');
+    % This will be necessary to keep the current x and y limits, for some
+    % reason, setting xlimmode and ylimmode to 'manual' doesn't work. Save
+    % the current limits, and reset them at the end.
+    old_xlim = get(gca, 'xlim');
+    old_ylim = get(gca, 'ylim');
 end
 
 
@@ -195,7 +195,7 @@ if ~draw_lines
     varargout{1} = lon_out;
     varargout{2} = lat_out;
 else
-    set(gca,'xlimmode',old_xlim_mode,'ylimmode',old_ylim_mode);
+    set(gca,'xlim',old_xlim,'ylim',old_ylim);
 end
 end
 

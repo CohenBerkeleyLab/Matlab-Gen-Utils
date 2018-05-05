@@ -9,6 +9,10 @@ function parameters = update_params(parameters,varargin)
 %
 %   PARAMETERS = UPDATE_PARAMS('remove', PARAMETERS, NAME1, NAME2, ...)
 %   will remove the parameters called NAME1, NAME2, etc.
+%
+%   PARAMETERS = UPDATE_PARAMS('remove', PARAMETERS, S) will take the field
+%   names of the structure S as the parameters to remove. This is useful if
+%   you have a structure returned by an input parser.
 
 E = JLLErrors;
 
@@ -42,6 +46,14 @@ if add_parameters
 else
     if numel(varargin) < 1
         E.badinput('Must provide at least one parameter name to remove');
+    end
+    
+    if isstruct(varargin{1})
+        if numel(varargin) == 1
+            varargin = fieldnames(varargin{1});
+        else
+            E.badinput('If providing a structure whose field names are the parameter names to remove, you can only give one such structure and no other parameter names'); 
+        end
     end
 end
 
