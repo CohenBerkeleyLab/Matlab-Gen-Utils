@@ -15,7 +15,7 @@ function is_sig = slope_significant(P, x, y, varargin)
 %       0.95.
 
 % TODO: add citation from the stats book
-E = JLLError;
+E = JLLErrors;
 p = inputParser;
 p.addOptional('test_slope', 0, @(x) isscalar(x) && isnumeric(x));
 p.addParameter('confidence', 0.95);
