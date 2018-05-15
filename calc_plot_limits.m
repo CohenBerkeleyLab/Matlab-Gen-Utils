@@ -47,40 +47,29 @@ if ~isnumeric(values)
     E.badinput('VALUES must be numeric');
 end
 
-xx = strcmpi('diff', varargin) | strcmpi('difference', varargin);
-make_equal_pos_neg = any(xx);
+p = advInputParser;
+p.addOptional('round_to', 1, @isnumeric);
+p.addFlag('diff');
+p.addFlag('difference');
+p.addFlag('zero');
+p.addFlag('pow10');
+p.addParameter('max', [-Inf Inf]);
+p.addParameter('sigma', 0);
 
-xx = strcmpi('zero', varargin);
-force_zero = any(xx);
+p.parse(varargin{:});
+pout = p.AdvResults;
 
-xx = strcmpi('pow10', varargin);
-scale_by_log = any(xx);
+round_to = pout.round_to;
+make_equal_pos_neg = pout.diff || pout.difference;
+force_zero = pout.zero;
+scale_by_log = pout.pow10;
+max_lims = pout.max;
+sigma_lims = pout.sigma;
 
-max_lims = [-Inf, Inf];
-xx = find(strcmpi('max', varargin));
-if ~isempty(xx)
-    if length(varargin) < xx+1 || ~isnumeric(varargin{xx+1}) || numel(varargin{xx+1}) ~= 2
-        E.badinput('The parameter ''max'' must be followed by a two-element numeric vector');
-    end
-    max_lims = varargin{xx+1};
+if sigma_lims > 0
+    values(abs(values) > sigma_lims * nanstd(values(:))) = [];
 end
 
-
-
-round_to = 1;
-found_round_to = false;
-for a=1:numel(varargin)
-    if isnumeric(varargin{a}) && isscalar(varargin{a})
-        if found_round_to
-            warning('Multiple values for round_to specified');
-        end
-        round_to = varargin{a};
-        if round_to < 0
-            E.badinput('ROUND_TO must be a positive number')
-        end
-        found_round_to = true;
-    end
-end
 
 if make_equal_pos_neg && force_zero
     E.badinput('''diff'' or ''difference'' and ''zero'' are mutually exclusive options');
@@ -91,9 +80,9 @@ if make_equal_pos_neg
     val_lims = [-limit, limit];
 elseif force_zero
     val_lims = [min(values(:)), max(values(:))];
-    if all(val_lims > 0)
+    if all(val_lims >= 0)
         val_lims(1) = 0;
-    elseif all(val_lims < 0)
+    elseif all(val_lims <= 0)
         val_lims(2) = 0;
     else
         warning('Values are both positive and negative, will not set one limit to 0');

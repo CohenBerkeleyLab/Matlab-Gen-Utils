@@ -66,15 +66,17 @@ end
 
 chk = chk & nans_pass;
 
-% Only if the NaNs are okay do we check that the numerical difference is
-% within the specified relative and absolute tolerance.
+% Only if neither value is a NaNs do we check that the numerical difference
+% is within the specified relative and absolute tolerance, because NaNs
+% will always fail this test.
+neither_nans = ~isnan(A) & ~isnan(B);
 if ~isempty(tolerance)
     delta = abs(A - B);
-    chk = chk & delta <= tolerance;
+    chk(neither_nans) = chk(neither_nans) & delta(neither_nans) <= tolerance;
 end
 if ~isempty(relative_tolerance)
     delta = abs(reldiff(A, B, 'avg'));
-    chk = chk & delta <= relative_tolerance;
+    chk(neither_nans) = chk(neither_nans) & delta(neither_nans) <= relative_tolerance;
 end
 
 end

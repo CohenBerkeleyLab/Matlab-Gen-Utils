@@ -126,6 +126,7 @@ LineData.StdDevM = sigma_m;
 LineData.StdDevB = sigma_b;
 LineData.p_value = p_val;
 LineData.is_significant = is_significant;
+LineData.num_pts = sum(~isnan(x) & ~isnan(y));
    
 if isnumeric(xcoord)
     line_x = xcoord;
