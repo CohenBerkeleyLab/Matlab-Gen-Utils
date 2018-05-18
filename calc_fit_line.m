@@ -58,6 +58,7 @@ p = inputParser;
 p.addRequired('x',@isnumeric);
 p.addRequired('y',@isnumeric);
 p.addParameter('pvalue',false);
+p.addParameter('significance',false);
 p.addParameter('regression','y-resid');
 p.addParameter('xcoord','figxlim');
 
@@ -68,6 +69,7 @@ y = pout.y;
 regression = lower(pout.regression); % explicitly make the regression string lower case to ease comparison in the switch-case statement
 pvalue = pout.pvalue;
 xcoord = lower(pout.xcoord);
+mark_significance = pout.significance;
 
 allowed_regressions = {'y-resid','x-resid','majoraxis','RMA','orth-origin'};
 if ~any(strcmpi(regression, allowed_regressions))
@@ -116,12 +118,15 @@ switch regression
 end
 
 p_val = p_val_slope(P(1), sigma_m, sum(~isnan(x) & ~isnan(y)));
+is_significant = slope_significant(P, x, y);
 
 LineData.P = P;
 LineData.R2 = R;
 LineData.StdDevM = sigma_m;
 LineData.StdDevB = sigma_b;
 LineData.p_value = p_val;
+LineData.is_significant = is_significant;
+LineData.num_pts = sum(~isnan(x) & ~isnan(y));
    
 if isnumeric(xcoord)
     line_x = xcoord;
@@ -138,6 +143,12 @@ if ~isnan(P(2))
 end
 
 
+if mark_significance && is_significant
+    sig_asterisk = '*';
+else
+    sig_asterisk = '';
+end
+
 legend_str = sprintf('Fit: %.4fx',P(1));
 if ~isnan(P(2))
     legend_str = [ legend_str, sprintf(' + %.2g', P(2)) ];
@@ -146,7 +157,7 @@ if ~isnan(R)
     if pvalue
         legend_str = [ legend_str, sprintf(' \nR^2 = %.4f (p = %.2f)',R,p_val) ];
     else
-        legend_str = [ legend_str, sprintf(' \nR^2 = %.4f',R) ];
+        legend_str = [ legend_str, sprintf(' \nR^2 = %.4f%s',R,sig_asterisk) ];
     end
 end
 

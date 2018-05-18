@@ -1,9 +1,12 @@
-function [  ] = bar_errors( bar_vals, error_vals )
+function [  ] = bar_errors( bar_vals, error_vals, varargin )
 %BAR_ERRORS Places error bars on the simplest bar graph possible.
 %   BAR_ERRORS( BAR_VALS, ERROR_VALS ) will generate a bar graph using the
 %   syntax BAR( BAR_VALS ). Symmetrical error bars will be placed on the
 %   bars ends with spread specified by ERROR_VALS. Error bars will be
 %   black.
+%
+%   BAR_ERRORS( BAR_VALS, ERROR_LOWER, ERROR_UPPER ) will put asymmetrical
+%   error bars on the plot.
 
 
 E = JLLErrors;
@@ -22,7 +25,7 @@ for a=1:numel(B)
     error_y(:,a) = B(a).YData;
 end
 
-scatter_errorbars(error_x, error_y, error_vals, 'color', 'k', 'linewidth', 2, 'tipscale', 2);
+scatter_errorbars(error_x, error_y, error_vals, varargin{:}, 'color', 'k', 'linewidth', 2, 'tipscale', 2);
 
 end
 
