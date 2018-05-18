@@ -287,9 +287,9 @@ tabular_body = sprintf(tex_in_printf(tabular_body));
 
 % Now figure out how tabular should be formatted
 if is_rownames
-    fmt_str = sprintf('l%s',repmat('l',1,n_columns_rownames), repmat('c', 1, n_columns-n_columns_rownames));
+    fmt_str = sprintf('%s%s',repmat('l',1,n_columns_rownames), repmat('r', 1, n_columns-n_columns_rownames));
 else
-    fmt_str = sprintf('%s', repmat('c', 1, n_columns));
+    fmt_str = sprintf('%s', repmat('r', 1, n_columns));
 end
 
 % And whether caption and label should be included

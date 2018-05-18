@@ -16,7 +16,9 @@ function varargout = combine_plots( varargin )
 %   figure to try to keep all the sub plots at their original size. You may
 %   change the factor of 1 to scale them to that fraction of their original
 %   size. If this parameter is omitted, the combined plot is not resized at
-%   all from the default figure size.
+%   all from the default figure size. This can also be a 1x2 vector if you
+%   want to scale the vertical and horizontal directions differently. (The
+%   vector would be [horizontal vertical].)
 
 E = JLLErrors;
 p = inputParser;
@@ -107,7 +109,7 @@ for a=1:nfigs
     copy_ax(new_ax).YLim = old_ylim;
 end
 
-if scale_figure > 0
+if numel(scale_figure) > 1 || scale_figure > 0
     % Of course the order in the position vector is different. Position(3)
     % is the width of the figure and Position(4) is its height.
     spfig.Position(3:4) =  scale_figure .* [x y] .* spfig.Position(3:4);
