@@ -289,6 +289,13 @@ classdef advInputParser < handle
             else
                 msg = varargin{2};
             end
+
+            % Because of how struct() interprets cell arrays, any default values that are cell arrays
+            % must be wrapped in an outer cell array to prevent the structure from being non-scalar
+            if iscell(default)
+                default = {default};
+            end
+
             S = struct('name', name, 'default', default, 'validation_fxn', val_fxn, 'error_msg', msg);
         end
         
