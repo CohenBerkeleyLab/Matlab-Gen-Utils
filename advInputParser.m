@@ -130,7 +130,7 @@ classdef advInputParser < handle
             
             err_struct = struct('message', formatted_msg,...
                 'identifier', 'MATLAB:InputParser:ArgumentFailedValidation',...
-                'stack', dbstack(2));
+                'stack', dbstack(3));
             % We omit the first levels in the stack because those will
             % point to the input parser, and we don't want that - we want
             % the calling function.
