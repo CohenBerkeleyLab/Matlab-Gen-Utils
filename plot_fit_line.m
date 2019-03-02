@@ -50,6 +50,9 @@ function [ LineData ] = plot_fit_line( x, varargin )
 %       sigma_b - a number indicating how many standard deviations of the
 %       intercept to plot as an envelope.  Defaults to 0, i.e. no envelope
 %       will be plotted.
+%
+%       legend_loc - a string to be given to the 'location' parameter for
+%       the legend.
 
 E = JLLErrors;
 
@@ -61,6 +64,7 @@ p.addParameter('pvalue',false);
 p.addParameter('regression','y-resid');
 p.addParameter('sigma_m',0,@isscalar);
 p.addParameter('sigma_b',0,@isscalar);
+p.addParameter('legend_loc', 'northeast');
 
 p.parse(x,varargin{:});
 pout = p.Results;
@@ -71,6 +75,7 @@ regression = pout.regression;
 pvalue = pout.pvalue;
 mult_sigma_m = pout.sigma_m;
 mult_sigma_b = pout.sigma_b;
+legend_location = pout.legend_loc;
 
 % Input validation
 if isa(x,'matlab.graphics.axis.Axes') 
@@ -136,7 +141,7 @@ end
 
 % legend req. that the vector of handles be a column vector, hence we
 % transpose it.
-legend(h',legendcell{:})
+legend(h',legendcell{:}, 'location', legend_location)
 end
 
 function [x,y] = get_child_data(ax)
