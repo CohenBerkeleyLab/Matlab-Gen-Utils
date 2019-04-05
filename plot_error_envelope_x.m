@@ -15,7 +15,8 @@ p.addRequired('y',@isnumeric);
 p.addRequired('x_lower',@isnumeric);
 p.addRequired('x_upper',@isnumeric);
 p.addParameter('colorspec',[0.8 0.8 0.8]);
-p.addParameter('facealpha',1,@isscalar);
+p.addParameter('facealpha',nan,@isscalar);
+p.addParameter('alpha',0.5,@isscalar);
 p.addParameter('ax',[]);
 
 p.parse(y_in, x_lower, x_upper, varargin{:});
@@ -27,7 +28,17 @@ xu = pout.x_upper;
 
 colspec = pout.colorspec;
 ax = pout.ax;
-facealpha = pout.facealpha;
+alpha = pout.alpha;
+if ~isnan(pout.facealpha)
+    msg = '"facealpha" is deprecated, use "alpha" instead.';
+    
+    if alpha == 0.5
+        alpha = pout.facealpha;
+    else
+        msg = [msg, ' Ignoring "facealpha" because "alpha" is not the default.'];
+    end
+    warning('deprecated:facealpha', msg);
+end
 
 % If no figure handle is passed, create one. If one is, switch to that
 % figure and turn hold on so that we don't delete existing data.
@@ -39,7 +50,7 @@ hold on
 X = [xl(:); flipud(xu(:))];
 Y = [y(:); flipud(y(:))];
 
-fill(ax, X,Y,colspec,'edgecolor','none','FaceAlpha',facealpha);
+fill(ax, X,Y,colspec,'edgecolor','none','FaceAlpha',alpha);
 hold off
 
 end

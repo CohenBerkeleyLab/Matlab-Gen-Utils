@@ -23,7 +23,7 @@ function [t_calc, t_table, is_different] = two_sample_t_test_alt(val1, sigma1, n
 %
 %       t_calc =          | v1 - v2 |
 %               ----------------------------
-%                sqrt(s1^2 * n1 + s2^2 * n2)
+%                sqrt(s1^2 / n1 + s2^2 / n2)
 %
 %       DoF    = (s1^2 / n1 + s2^2 / n2)^2
 %               ---------------------------

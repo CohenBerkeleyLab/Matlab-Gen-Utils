@@ -10,44 +10,28 @@ function [ fighandle, h ] = plot_error_envelope_y( x_in, y_lower, y_upper, varar
 %
 %   Returns the figure handle and handle to the fill object.
 
-p = inputParser;
-p.addRequired('y',@isnumeric);
-p.addRequired('x_lower',@isnumeric);
-p.addRequired('x_upper',@isnumeric);
-p.addOptional('colorspec',[0.8 0.8 0.8], @(t) (isnumeric(t) || ischar(t)));
-p.addOptional('fignum',-1, @(t) (ishandle(t) && strcmp(get(t,'type'),'figure')));
-p.addParameter('alpha', 0.5);
+p = advInputParser;
 
-p.parse(x_in, y_lower, y_upper, varargin{:});
+p.addOptional('colorspec',[0.8 0.8 0.8], @(t) (isnumeric(t) || ischar(t)));
+p.addParameter('alpha', 0.5);
+p.addParameter('parent', gca);
+p.parse(varargin{:});
 pout = p.Results;
 
-x = pout.y;
-yl = pout.x_lower;
-yu = pout.x_upper;
 alpha = pout.alpha;
+ax = pout.parent;
 
 %Convert all to column vectors
-x = x(:);
-yl = yl(:);
-yu = yu(:);
+x_in = x_in(:);
+y_lower = y_lower(:);
+y_upper = y_upper(:);
 
 colspec = pout.colorspec;
-nfig = pout.fignum;
 
-% If no figure handle is passed, create one. If one is, switch to that
-% figure and turn hold on so that we don't delete existing data.
-if nfig == -1
-    fighandle = figure();
-else
-    fighandle = figure(nfig);
-    hold on
-end
+Y = [y_lower; flipud(y_upper)];
+X = [x_in; flipud(x_in)];
 
-
-Y = [yl; flipud(yu)];
-X = [x; flipud(x)];
-
-h=fill(X,Y,colspec,'edgecolor','none','facealpha',0.5);
+h=fill(ax,X,Y,colspec,'edgecolor','none','facealpha',alpha);
 hold off
 
 end
